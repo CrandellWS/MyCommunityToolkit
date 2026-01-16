@@ -315,7 +315,7 @@ const MyPrizeAPI = (() => {
     list: (params = {}) => request('/rooms', { params }),
     get: (id) => request(`/rooms/${id}`),
     getBySlug: (slug) => request(`/rooms/slug/${slug}`),
-    getStats: (id) => request(`/rooms/${id}/stats`),
+    getBetRoundMetrics: (id) => request(`/rooms/${id}/bet_round_metrics`),
     getRecentGames: (id, params = {}) => request(`/rooms/${id}/igames/recent`, { params }),
   };
 
@@ -328,7 +328,10 @@ const MyPrizeAPI = (() => {
   // iGames (Casino Games)
   const igames = {
     list: (params = {}) => request('/igames', { params }),
-    get: (id) => request(`/igames/${id}`),
+    get: (slugOrId) => request(`/igames/slug/${slugOrId}`),
+    getPopular: (params = {}) => request('/igames/popular', { params }),
+    getFilters: () => request('/igames/filters'),
+    getForMission: (missionId, params = {}) => request(`/igames/mission/${missionId}`, { params }),
     getByProvider: (provider, params = {}) => request('/igames', {
       params: { ...params, equals_field: 'provider', equals_value: provider }
     }),
@@ -337,20 +340,29 @@ const MyPrizeAPI = (() => {
   // Missions
   const missions = {
     list: (params = {}) => request('/missions', { params }),
-    get: (id) => request(`/missions/${id}`),
     getByRoom: (roomId, params = {}) => request('/missions', {
       params: { ...params, room_id: roomId }
     }),
-    getLeaderboard: (id) => request(`/missions/${id}/leaderboard`),
+    getGames: (missionId, params = {}) => request(`/igames/mission/${missionId}`, { params }),
   };
 
   // Bets
   const bets = {
-    getBig: (params = {}) => request('/bets/tracked/type/big', { params }),
-    getLucky: (params = {}) => request('/bets/tracked/type/lucky', { params }),
-    getRecent: (params = {}) => request('/bets/tracked/type/recent', { params }),
-    getWins: (params = {}) => request('/bets/tracked/type/wins', { params }),
+    getBig: (params = {}) => request('/bets/tracked/type/big', { params: formatBetsParams(params) }),
+    getLucky: (params = {}) => request('/bets/tracked/type/lucky', { params: formatBetsParams(params) }),
+    getRecent: (params = {}) => request('/bets/tracked/type/recent', { params: formatBetsParams(params) }),
+    getWins: (params = {}) => request('/bets/tracked/type/wins', { params: formatBetsParams(params) }),
+    getById: (id) => request(`/bets/tracked/${id}`),
   };
+
+  // Helper to convert room_id param to equals_field/equals_value format
+  function formatBetsParams(params) {
+    const { room_id, ...rest } = params;
+    if (room_id) {
+      return { ...rest, equals_field: 'room_id', equals_value: room_id };
+    }
+    return rest;
+  }
 
   // Content
   const content = {
@@ -363,6 +375,12 @@ const MyPrizeAPI = (() => {
     getFeatures: () => request('/features'),
     getJurisdiction: () => request('/jurisdiction'),
     health: () => request('/jurisdiction', { cache: false, timeout: 5000 }),
+    getPolicies: (jurisdiction) => request(`/policies/${jurisdiction}`),
+  };
+
+  // Pragmatic Jackpots
+  const pragmatic = {
+    getJackpots: (currency) => request(`/pragmatic/jackpots/${currency}`),
   };
 
   // Configure client
@@ -386,6 +404,7 @@ const MyPrizeAPI = (() => {
     bets,
     content,
     system,
+    pragmatic,
   };
 })();
 
