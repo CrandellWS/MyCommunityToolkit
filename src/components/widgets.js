@@ -93,15 +93,18 @@ const Widgets = (() => {
       return new Intl.NumberFormat().format(num);
     }
 
-    // Utility: Format currency
+    // Utility: Format currency (handles SC, GC, USD)
     formatCurrency(amount, currency = 'USD') {
       if (amount === null || amount === undefined) return '-';
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency,
+      const formatted = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
       }).format(amount);
+
+      // Custom currency symbols for MyPrize currencies
+      const symbols = { SC: 'SC ', GC: 'GC ', USD: '$' };
+      const symbol = symbols[currency] || `${currency} `;
+      return currency === 'USD' ? `${symbol}${formatted}` : `${symbol}${formatted}`;
     }
 
     // Utility: Format relative time
