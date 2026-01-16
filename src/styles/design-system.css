@@ -528,3 +528,104 @@ body {
     --card-border: var(--color-neutral-900);
   }
 }
+
+/* ============================================
+   12. THEME TOGGLE CLASSES
+   ============================================ */
+
+/* No animations mode (via ThemeConfig) */
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Reduced motion mode (via ThemeConfig) */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* No glow effects mode (via ThemeConfig) */
+.no-glow {
+  --shadow-glow: none;
+  --color-glow-primary: transparent;
+  --color-glow-accent: transparent;
+  --color-glow-gold: transparent;
+}
+
+.no-glow .shadow-glow,
+.no-glow .card-glow:hover,
+.no-glow .hover-glow:hover,
+.no-glow .animate-glow,
+.no-glow .animate-glow-pulse,
+.no-glow .glow-pulse {
+  box-shadow: var(--shadow-md) !important;
+  animation: none !important;
+}
+
+/* Compact mode (via ThemeConfig) - global */
+.compact {
+  --space-1: 0.125rem;
+  --space-2: 0.25rem;
+  --space-3: 0.375rem;
+  --space-4: 0.5rem;
+  --space-5: 0.625rem;
+  --space-6: 0.75rem;
+  --space-8: 1rem;
+  --space-10: 1.25rem;
+  --space-12: 1.5rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.8125rem;
+  --font-size-lg: 0.875rem;
+  --font-size-xl: 1rem;
+}
+
+.compact .card {
+  padding: var(--space-3);
+}
+
+.compact .card-header {
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* High contrast mode (via ThemeConfig) */
+.high-contrast {
+  --color-primary-500: #0055dd;
+  --color-accent-500: #007700;
+  --color-neutral-500: #333333;
+  --color-neutral-600: #222222;
+  --color-neutral-700: #111111;
+  --card-border: var(--color-neutral-700);
+  --card-bg: var(--color-neutral-0);
+}
+
+.high-contrast.dark,
+.dark.high-contrast {
+  --card-bg: #000000;
+  --card-border: #ffffff;
+  --color-neutral-100: #1a1a1a;
+  --color-neutral-200: #333333;
+}
+
+.high-contrast .card,
+.high-contrast .btn,
+.high-contrast input,
+.high-contrast select {
+  border-width: 2px;
+}
+
+.high-contrast a {
+  text-decoration: underline;
+}
+
+.high-contrast .text-muted {
+  color: var(--color-neutral-600);
+}
