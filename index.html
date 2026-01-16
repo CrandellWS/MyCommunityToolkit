@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyPrize Streamer Toolkit</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="src/styles/design-system.css">
+  <link rel="stylesheet" href="src/styles/animations.css">
+  <link rel="stylesheet" href="src/styles/components.css">
+  <link rel="stylesheet" href="src/styles/overlay.css">
+
+  <style>
+    /* Page-specific styles */
+    .page-header {
+      background: linear-gradient(135deg, var(--color-neutral-900) 0%, var(--color-neutral-800) 100%);
+      color: white;
+      padding: var(--space-8) 0;
+      margin-bottom: var(--space-8);
+    }
+
+    .page-header h1 {
+      font-size: var(--font-size-4xl);
+      font-weight: var(--font-weight-extrabold);
+      margin-bottom: var(--space-2);
+    }
+
+    .page-header .subtitle {
+      color: var(--color-neutral-400);
+      font-size: var(--font-size-lg);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Widgets Grid */
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+
+    .widgets-grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 1024px) {
+      .widgets-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .widgets-grid,
+      .widgets-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Widget Styles */
+    .widget {
+      height: 100%;
+    }
+
+    .widget .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .widget .card-body {
+      flex: 1;
+    }
+
+    .widget-loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .widget-error .card {
+      border-color: var(--color-error);
+    }
+
+    /* Win Item Styles */
+    .win-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3);
+      border-radius: var(--radius-lg);
+      background: var(--color-neutral-50);
+      margin-bottom: var(--space-2);
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .win-item:hover {
+      background: var(--color-neutral-100);
+      transform: translateX(4px);
+    }
+
+    .win-game {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .win-game-image {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+    }
+
+    .win-game-name {
+      font-weight: var(--font-weight-medium);
+      display: block;
+    }
+
+    .win-username {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-500);
+    }
+
+    .win-details {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .win-amount {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-success);
+    }
+
+    /* Theme Switcher */
+    .theme-switcher {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      background: var(--color-neutral-100);
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: var(--space-2) var(--space-4);
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      transition: all var(--duration-fast);
+    }
+
+    .theme-btn:hover {
+      background: var(--color-neutral-200);
+    }
+
+    .theme-btn.active {
+      background: var(--color-primary-500);
+      color: white;
+    }
+
+    .theme-btn:focus-visible {
+      outline: 2px solid var(--color-primary-500);
+      outline-offset: 2px;
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      background: var(--color-neutral-0);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-6);
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .setting-label {
+      font-weight: var(--font-weight-medium);
+    }
+
+    .setting-description {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-500);
+    }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      padding: var(--space-8) 0;
+      border-top: 1px solid var(--color-neutral-200);
+      margin-top: var(--space-12);
+      color: var(--color-neutral-500);
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-4);
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .section-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Demo Controls */
+    .demo-controls {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-6);
+    }
+
+    /* Color Picker */
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .color-picker {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--color-neutral-300);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .color-picker::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    .color-picker::-webkit-color-swatch {
+      border-radius: var(--radius-md);
+    }
+
+    /* Full width section */
+    .full-width-section {
+      margin-bottom: var(--space-8);
+    }
+
+    /* Leaderboard Widget Styles */
+    .leaderboard-widget .card {
+      max-height: 450px;
+      overflow-y: auto;
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .leaderboard-entry {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      background: var(--color-neutral-50);
+      border-radius: var(--radius-lg);
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .leaderboard-entry:hover {
+      background: var(--color-neutral-100);
+    }
+
+    .leaderboard-entry.podium-gold {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .leaderboard-entry.podium-silver {
+      background: linear-gradient(135deg, rgba(156, 163, 175, 0.15), rgba(156, 163, 175, 0.05));
+      border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    .leaderboard-entry.podium-bronze {
+      background: linear-gradient(135deg, rgba(180, 83, 9, 0.15), rgba(180, 83, 9, 0.05));
+      border: 1px solid rgba(180, 83, 9, 0.3);
+    }
+
+    .leaderboard-entry.highlighted {
+      border: 2px solid var(--color-primary-500);
+    }
+
+    .entry-rank {
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .rank-number {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutral-500);
+    }
+
+    .medal {
+      font-size: 1.5rem;
+    }
+
+    .rank-change-icon {
+      font-size: 0.7rem;
+    }
+
+    .rank-change-icon.up {
+      color: var(--color-success);
+    }
+
+    .rank-change-icon.down {
+      color: var(--color-error);
+    }
+
+    .entry-user {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .entry-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .entry-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-sm);
+      color: white;
+    }
+
+    .entry-username {
+      font-weight: var(--font-weight-medium);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .entry-score {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-1);
+    }
+
+    .score-value {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-success);
+    }
+
+    .score-label {
+      font-size: var(--font-size-xs);
+      color: var(--color-neutral-500);
+    }
+
+    /* Game Carousel Styles */
+    .carousel-container {
+      overflow: hidden;
+      margin: 0 -var(--space-4);
+      padding: 0 var(--space-4);
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: var(--space-4);
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: var(--space-2) 0;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .game-card {
+      min-width: 180px;
+      max-width: 180px;
+      background: var(--color-neutral-0);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: all var(--duration-normal) var(--ease-out);
+      cursor: pointer;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .game-card:focus-visible {
+      outline: 2px solid var(--color-primary-500);
+      outline-offset: 2px;
+    }
+
+    .game-card-image {
+      width: 100%;
+      height: 120px;
+      position: relative;
+      overflow: hidden;
+      background: var(--color-neutral-100);
+    }
+
+    .game-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .game-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--color-primary-100), var(--color-accent-100));
+    }
+
+    .game-multiplier {
+      position: absolute;
+      bottom: var(--space-2);
+      right: var(--space-2);
+    }
+
+    .multiplier-badge {
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 2px 8px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .game-card-body {
+      padding: var(--space-3);
+    }
+
+    .game-name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      margin: 0 0 var(--space-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-provider {
+      font-size: var(--font-size-xs);
+    }
+
+    .carousel-controls {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    /* User Profile Styles */
+    .profile-content {
+      padding: var(--space-4);
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .profile-avatar {
+      position: relative;
+    }
+
+    .avatar-large {
+      width: 64px;
+      height: 64px;
+      font-size: var(--font-size-xl);
+    }
+
+    .profile-level {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      font-size: var(--font-size-xs);
+    }
+
+    .profile-username {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      margin: 0 0 var(--space-1);
+    }
+
+    .profile-joined {
+      font-size: var(--font-size-sm);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+      padding: var(--space-4);
+      background: var(--color-neutral-50);
+      border-radius: var(--radius-lg);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: var(--font-size-xs);
+      color: var(--color-neutral-500);
+    }
+
+    .profile-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .badge-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      background: var(--color-neutral-100);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+    }
+
+    .badge-icon {
+      font-size: 1rem;
+    }
+
+    /* Skeleton loaders */
+    .skeleton {
+      background: linear-gradient(90deg,
+        var(--color-neutral-200) 25%,
+        var(--color-neutral-300) 50%,
+        var(--color-neutral-200) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s ease-in-out infinite;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-avatar-lg {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-full);
+    }
+
+    .skeleton-title {
+      height: 24px;
+      width: 120px;
+      margin-bottom: var(--space-2);
+    }
+
+    .skeleton-text-sm {
+      height: 16px;
+      width: 80px;
+    }
+
+    .skeleton-stat {
+      height: 32px;
+      width: 60px;
+      margin: 0 auto var(--space-1);
+    }
+
+    .skeleton-label {
+      height: 12px;
+      width: 50px;
+      margin: 0 auto;
+    }
+
+    .skeleton-badge {
+      height: 28px;
+      width: 80px;
+    }
+
+    /* Nav links */
+    .nav-links {
+      display: flex;
+      gap: var(--space-4);
+      margin-top: var(--space-2);
+    }
+
+    .nav-links a {
+      color: var(--color-neutral-400);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      transition: color var(--duration-fast);
+    }
+
+    .nav-links a:hover {
+      color: white;
+    }
+
+    /* Settings Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-modal);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-container {
+      background: var(--color-neutral-0);
+      border-radius: var(--radius-xl);
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95);
+      transition: transform var(--duration-normal) var(--ease-out);
+    }
+
+    .modal-overlay.visible .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: var(--space-4) var(--space-6);
+      border-bottom: 1px solid var(--color-neutral-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-6);
+    }
+
+    .modal-footer {
+      padding: var(--space-4) var(--space-6);
+      border-top: 1px solid var(--color-neutral-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-3);
+    }
+
+    .settings-tabs {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: var(--space-6);
+      border-bottom: 1px solid var(--color-neutral-200);
+      padding-bottom: var(--space-2);
+    }
+
+    .tab-btn {
+      padding: var(--space-2) var(--space-4);
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutral-600);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: all var(--duration-fast);
+    }
+
+    .tab-btn:hover {
+      background: var(--color-neutral-100);
+    }
+
+    .tab-btn.active {
+      background: var(--color-primary-100);
+      color: var(--color-primary-700);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .settings-section {
+      margin-bottom: var(--space-6);
+    }
+
+    .settings-section-title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-4);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-3);
+    }
+
+    .settings-label {
+      font-size: var(--font-size-sm);
+    }
+
+    .settings-select {
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--color-neutral-300);
+      border-radius: var(--radius-md);
+      background: var(--color-neutral-0);
+      font-size: var(--font-size-sm);
+    }
+
+    .theme-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    .theme-preset-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      cursor: pointer;
+    }
+
+    .theme-preset-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .theme-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-lg);
+      border: 2px solid transparent;
+      transition: all var(--duration-fast);
+    }
+
+    .theme-preset-option input:checked + .theme-preview {
+      border-color: var(--color-primary-500);
+    }
+
+    .theme-preview.light { background: linear-gradient(135deg, #f8fafc, #e2e8f0); }
+    .theme-preview.dark { background: linear-gradient(135deg, #1e293b, #0f172a); }
+    .theme-preview.neon { background: linear-gradient(135deg, #0f172a, #00ffff); }
+    .theme-preview.sunset { background: linear-gradient(135deg, #f97316, #ec4899); }
+    .theme-preview.forest { background: linear-gradient(135deg, #22c55e, #84cc16); }
+
+    .theme-label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .color-input {
+      width: 48px;
+      height: 32px;
+      border: 1px solid var(--color-neutral-300);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <h1 class="animate-fade-in-up">MyPrize Streamer Toolkit</h1>
+      <p class="subtitle animate-fade-in-up" style="animation-delay: 100ms">
+        Beautiful, real-time widgets for your streaming dashboard
+      </p>
+      <div class="header-actions animate-fade-in-up" style="animation-delay: 200ms">
+        <button class="btn btn-primary btn-lg" id="btn-demo-toast" aria-label="Show achievement notification">
+          &#127881; Show Achievement
+        </button>
+        <button class="btn btn-secondary btn-lg" id="btn-demo-all" aria-label="Refresh all widgets">
+          &#8635; Refresh All
+        </button>
+        <button class="btn btn-ghost btn-lg" id="btn-settings" aria-label="Open settings">
+          &#9881; Settings
+        </button>
+      </div>
+      <nav class="nav-links animate-fade-in-up" style="animation-delay: 300ms" aria-label="Demo pages">
+        <a href="demos/basic-dashboard.html">Dashboard</a>
+        <a href="demos/streamer-overlay.html">Overlay</a>
+        <a href="demos/custom-theme.html">Themes</a>
+        <a href="demos/minimal-widget.html">Quick Start</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Theme Switcher -->
+    <section class="reveal" aria-labelledby="theme-title">
+      <div class="section-header">
+        <h2 id="theme-title" class="section-title">Theme</h2>
+      </div>
+      <div class="theme-switcher" role="radiogroup" aria-label="Select theme">
+        <button class="theme-btn active" data-theme="light" role="radio" aria-checked="true">&#9728;&#65039; Light</button>
+        <button class="theme-btn" data-theme="dark" role="radio" aria-checked="false">&#127769; Dark</button>
+        <button class="theme-btn" data-theme="neon" role="radio" aria-checked="false">&#128302; Neon</button>
+        <button class="theme-btn" data-theme="sunset" role="radio" aria-checked="false">&#127749; Sunset</button>
+        <button class="theme-btn" data-theme="forest" role="radio" aria-checked="false">&#127794; Forest</button>
+      </div>
+    </section>
+
+    <!-- Settings Panel -->
+    <section class="settings-panel reveal" aria-labelledby="settings-title">
+      <div class="section-header">
+        <h2 id="settings-title" class="section-title">Customization</h2>
+      </div>
+      <div class="settings-grid">
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Primary Color</div>
+            <div class="setting-description">Main brand color</div>
+          </div>
+          <div class="color-picker-wrapper">
+            <input type="color" class="color-picker" id="primary-color" value="#3b82f6" aria-label="Primary color picker">
+          </div>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Accent Color</div>
+            <div class="setting-description">Secondary highlight</div>
+          </div>
+          <div class="color-picker-wrapper">
+            <input type="color" class="color-picker" id="accent-color" value="#22c55e" aria-label="Accent color picker">
+          </div>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Animations</div>
+            <div class="setting-description">Enable micro-interactions</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-animations" checked aria-label="Toggle animations">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Glow Effects</div>
+            <div class="setting-description">Neon-style glows</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-glow" checked aria-label="Toggle glow effects">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Dashboard -->
+    <section class="reveal" aria-labelledby="stats-title">
+      <div class="section-header">
+        <h2 id="stats-title" class="section-title">Quick Stats</h2>
+        <span class="badge badge-success">
+          <span class="status-dot online" aria-hidden="true"></span>
+          Live
+        </span>
+      </div>
+      <div class="dashboard-grid stagger-children">
+        <div id="stat-viewers"></div>
+        <div id="stat-bets"></div>
+        <div id="stat-wins"></div>
+        <div id="stat-momentum"></div>
+      </div>
+    </section>
+
+    <!-- Widgets Grid -->
+    <section class="reveal" aria-labelledby="widgets-title">
+      <div class="section-header">
+        <h2 id="widgets-title" class="section-title">Live Widgets</h2>
+      </div>
+      <div class="widgets-grid">
+        <div id="widget-big-wins"></div>
+        <div id="widget-leaderboard"></div>
+        <div id="widget-rate-limit"></div>
+      </div>
+    </section>
+
+    <!-- Game Carousel -->
+    <section class="full-width-section reveal" aria-labelledby="games-title">
+      <div class="section-header">
+        <h2 id="games-title" class="section-title">Popular Games</h2>
+      </div>
+      <div id="widget-game-carousel"></div>
+    </section>
+
+    <!-- User Profile and Missions -->
+    <section class="reveal" aria-labelledby="profile-title">
+      <div class="section-header">
+        <h2 id="profile-title" class="section-title">User Profile & Missions</h2>
+      </div>
+      <div class="widgets-grid widgets-grid-2">
+        <div id="widget-user-profile"></div>
+        <div id="widget-missions"></div>
+      </div>
+    </section>
+
+    <!-- Momentum Meter -->
+    <section class="reveal" aria-labelledby="momentum-title">
+      <div class="section-header">
+        <h2 id="momentum-title" class="section-title">Room Momentum</h2>
+      </div>
+      <div id="widget-momentum" style="max-width: 500px;"></div>
+    </section>
+
+    <!-- Demo Buttons -->
+    <section class="reveal" aria-labelledby="toasts-title">
+      <div class="section-header">
+        <h2 id="toasts-title" class="section-title">Toast Notifications</h2>
+      </div>
+      <div class="demo-controls">
+        <button class="btn btn-primary" onclick="Toast.success('Operation completed successfully!')">
+          &#10003; Success
+        </button>
+        <button class="btn btn-secondary" onclick="Toast.error('Something went wrong!')">
+          &#10005; Error
+        </button>
+        <button class="btn btn-secondary" onclick="Toast.warning('Please check your input')">
+          &#9888; Warning
+        </button>
+        <button class="btn btn-secondary" onclick="Toast.info('New update available')">
+          &#8505; Info
+        </button>
+        <button class="btn btn-accent" onclick="showAchievement()">
+          &#127942; Achievement
+        </button>
+      </div>
+    </section>
+
+    <!-- Animation Showcase -->
+    <section class="reveal" aria-labelledby="animations-title">
+      <div class="section-header">
+        <h2 id="animations-title" class="section-title">Animation Examples</h2>
+      </div>
+      <div class="grid grid-cols-4 gap-4" style="margin-bottom: var(--space-8);">
+        <div class="card card-hover p-4 text-center" tabindex="0">
+          <div class="animate-bounce text-3xl mb-2" aria-hidden="true">&#11014;&#65039;</div>
+          <div class="text-sm text-muted">Bounce</div>
+        </div>
+        <div class="card card-hover p-4 text-center" tabindex="0">
+          <div class="animate-pulse text-3xl mb-2" aria-hidden="true">&#128147;</div>
+          <div class="text-sm text-muted">Pulse</div>
+        </div>
+        <div class="card card-hover p-4 text-center" tabindex="0">
+          <div class="animate-spin text-3xl mb-2" aria-hidden="true">&#9881;&#65039;</div>
+          <div class="text-sm text-muted">Spin</div>
+        </div>
+        <div class="card card-hover p-4 text-center" tabindex="0">
+          <div class="animate-float text-3xl mb-2" aria-hidden="true">&#127880;</div>
+          <div class="text-sm text-muted">Float</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <div class="container">
+      <p>MyPrize Streamer Toolkit &bull; Built with &#10084;&#65039; for streamers</p>
+      <p class="text-sm" style="margin-top: var(--space-2);">
+        API Rate Limit: <span id="footer-rate-limit">-</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="src/config/theme-config.js"></script>
+  <script src="src/utils/api-client.js"></script>
+  <script src="src/components/toast.js"></script>
+  <script src="src/components/widgets.js"></script>
+  <script src="src/components/leaderboard.js"></script>
+  <script src="src/components/game-carousel.js"></script>
+  <script src="src/components/user-profile.js"></script>
+  <script src="src/components/settings-modal.js"></script>
+
+  <script>
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize theme
+      if (typeof ThemeConfig !== 'undefined') {
+        ThemeConfig.init();
+      }
+
+      // Theme switcher
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.theme-btn').forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-checked', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-checked', 'true');
+          ThemeConfig.set('theme', btn.dataset.theme);
+        });
+      });
+
+      // Color pickers
+      document.getElementById('primary-color').addEventListener('input', (e) => {
+        ThemeConfig.set('primaryColor', e.target.value);
+      });
+
+      document.getElementById('accent-color').addEventListener('input', (e) => {
+        ThemeConfig.set('accentColor', e.target.value);
+      });
+
+      // Toggles
+      document.getElementById('toggle-animations').addEventListener('change', (e) => {
+        ThemeConfig.set('animations', e.target.checked);
+      });
+
+      document.getElementById('toggle-glow').addEventListener('change', (e) => {
+        ThemeConfig.set('glowEffects', e.target.checked);
+      });
+
+      // Initialize stat widgets with demo data
+      initStatWidgets();
+
+      // Initialize live widgets
+      initLiveWidgets();
+
+      // Initialize new widgets
+      initNewWidgets();
+
+      // Demo toast button
+      document.getElementById('btn-demo-toast').addEventListener('click', showAchievement);
+
+      // Refresh all button
+      document.getElementById('btn-demo-all').addEventListener('click', () => {
+        Widgets.getAll().forEach(w => w.refresh());
+        Toast.info('Refreshing all widgets...');
+      });
+
+      // Settings button
+      document.getElementById('btn-settings').addEventListener('click', () => {
+        if (typeof SettingsModal !== 'undefined') {
+          SettingsModal.open();
+        }
+      });
+
+      // Initialize settings modal
+      if (typeof SettingsModal !== 'undefined') {
+        SettingsModal.create({
+          onSave: (settings) => {
+            Toast.success('Settings saved successfully!');
+          }
+        });
+      }
+
+      // Scroll reveal animation
+      initScrollReveal();
+
+      // Update rate limit display
+      updateRateLimitFooter();
+      setInterval(updateRateLimitFooter, 5000);
+    });
+
+    function initStatWidgets() {
+      // Viewers stat
+      Widgets.create('stat', '#stat-viewers', {
+        title: 'Active Viewers',
+        icon: '&#128065;',
+        prefix: '',
+        suffix: '',
+        color: 'primary',
+        value: 1247,
+        previousValue: 1180,
+        refreshInterval: 0,
+      });
+
+      // Bets stat
+      Widgets.create('stat', '#stat-bets', {
+        title: 'Bets Today',
+        icon: '&#127920;',
+        color: 'accent',
+        value: 8432,
+        previousValue: 7890,
+        refreshInterval: 0,
+      });
+
+      // Big Wins stat
+      Widgets.create('stat', '#stat-wins', {
+        title: 'Big Wins',
+        icon: '&#127942;',
+        color: 'warning',
+        value: 156,
+        previousValue: 142,
+        refreshInterval: 0,
+      });
+
+      // Momentum stat
+      Widgets.create('stat', '#stat-momentum', {
+        title: 'Momentum',
+        icon: '&#128293;',
+        suffix: '%',
+        color: 'error',
+        value: 78,
+        previousValue: 65,
+        refreshInterval: 0,
+      });
+    }
+
+    function initLiveWidgets() {
+      // Big Wins widget
+      Widgets.create('big-wins', '#widget-big-wins', {
+        title: 'Recent Big Wins',
+        limit: 5,
+        refreshInterval: 30000,
+      });
+
+      // Missions widget
+      Widgets.create('missions', '#widget-missions', {
+        title: 'Active Missions',
+        limit: 5,
+        refreshInterval: 60000,
+      });
+
+      // Rate limit widget
+      Widgets.create('rate-limit', '#widget-rate-limit', {
+        showHeader: true,
+        refreshInterval: 5000,
+      });
+
+      // Momentum meter
+      Widgets.create('momentum', '#widget-momentum', {
+        showLabels: true,
+        showValue: true,
+        refreshInterval: 0,
+      });
+    }
+
+    function initNewWidgets() {
+      // Leaderboard widget
+      if (typeof Leaderboard !== 'undefined') {
+        Leaderboard.create('#widget-leaderboard', {
+          title: 'Top Players',
+          limit: 5,
+          showPodium: true,
+          showAvatars: true,
+          animateChanges: true,
+          refreshInterval: 30000,
+        });
+      }
+
+      // Game Carousel widget
+      if (typeof GameCarousel !== 'undefined') {
+        GameCarousel.create('#widget-game-carousel', {
+          title: 'Popular Games',
+          limit: 15,
+          showProvider: true,
+          showMultiplier: true,
+          showArrows: true,
+          refreshInterval: 120000,
+        });
+      }
+
+      // User Profile widget
+      if (typeof UserProfile !== 'undefined') {
+        UserProfile.create('#widget-user-profile', {
+          username: 'StreamerPro',
+          showStats: true,
+          showBadges: true,
+          showJoinDate: true,
+          animateStats: true,
+          refreshInterval: 60000,
+        });
+      }
+    }
+
+    function showAchievement() {
+      Toast.achievement(
+        '&#127881; Achievement Unlocked!',
+        'High Roller: Placed 100 bets in a single session',
+        { duration: 7000 }
+      );
+    }
+
+    function initScrollReveal() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      document.querySelectorAll('.reveal').forEach(el => {
+        observer.observe(el);
+      });
+    }
+
+    function updateRateLimitFooter() {
+      const status = MyPrizeAPI.getRateLimitStatus();
+      const el = document.getElementById('footer-rate-limit');
+      if (el) {
+        el.textContent = `${status.used.toLocaleString()} / ${status.limit.toLocaleString()} (${status.percentage.toFixed(1)}%)`;
+      }
+    }
+  </script>
+</body>
+</html>

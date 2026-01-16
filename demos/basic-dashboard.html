@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Dashboard - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      padding: var(--space-8);
+    }
+
+    .dashboard-header {
+      margin-bottom: var(--space-8);
+      text-align: center;
+    }
+
+    .dashboard-title {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--space-2);
+    }
+
+    .dashboard-subtitle {
+      color: var(--color-neutral-500);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-6);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .dashboard-section {
+      margin-top: var(--space-8);
+    }
+
+    .section-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: var(--space-4);
+      }
+
+      .dashboard-grid {
+        gap: var(--space-4);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header">
+    <h1 class="dashboard-title text-gradient">MyPrize Dashboard</h1>
+    <p class="dashboard-subtitle">Real-time statistics and activity feed</p>
+  </header>
+
+  <main>
+    <!-- Stats Section -->
+    <section class="dashboard-section" aria-labelledby="stats-title">
+      <h2 id="stats-title" class="section-title">
+        <span aria-hidden="true">&#128200;</span>
+        Live Statistics
+      </h2>
+      <div class="dashboard-grid">
+        <div id="stat-viewers"></div>
+        <div id="stat-wins"></div>
+        <div id="stat-multiplier"></div>
+        <div id="stat-missions"></div>
+      </div>
+    </section>
+
+    <!-- Activity Section -->
+    <section class="dashboard-section" aria-labelledby="activity-title">
+      <h2 id="activity-title" class="section-title">
+        <span aria-hidden="true">&#127942;</span>
+        Recent Activity
+      </h2>
+      <div class="dashboard-grid">
+        <div id="big-wins-widget"></div>
+        <div id="leaderboard-widget"></div>
+      </div>
+    </section>
+
+    <!-- Games Section -->
+    <section class="dashboard-section" aria-labelledby="games-title">
+      <h2 id="games-title" class="section-title">
+        <span aria-hidden="true">&#127918;</span>
+        Popular Games
+      </h2>
+      <div id="game-carousel" class="full-width"></div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="../src/utils/api-client.js"></script>
+  <script src="../src/config/theme-config.js"></script>
+  <script src="../src/components/widgets.js"></script>
+  <script src="../src/components/leaderboard.js"></script>
+  <script src="../src/components/game-carousel.js"></script>
+  <script>
+    // Initialize theme
+    if (typeof ThemeConfig !== 'undefined') {
+      ThemeConfig.init();
+    }
+
+    // Initialize stat cards
+    Widgets.create('stat', '#stat-viewers', {
+      title: 'Active Viewers',
+      icon: '&#128065;',
+      color: 'primary',
+      fetchFn: async () => {
+        try {
+          const data = await MyPrizeAPI.users.getStats();
+          return data.activeUserCount || 0;
+        } catch {
+          return Math.floor(Math.random() * 500) + 100;
+        }
+      },
+      refreshInterval: 30000,
+    });
+
+    Widgets.create('stat', '#stat-wins', {
+      title: 'Total Wins Today',
+      icon: '&#127942;',
+      color: 'success',
+      fetchFn: async () => {
+        try {
+          const data = await MyPrizeAPI.bets.getWins({ page_size: 100 });
+          const wins = Array.isArray(data) ? data : data.data || [];
+          return wins.length;
+        } catch {
+          return Math.floor(Math.random() * 200) + 50;
+        }
+      },
+      refreshInterval: 30000,
+    });
+
+    Widgets.create('stat', '#stat-multiplier', {
+      title: 'Top Multiplier',
+      icon: '&#128640;',
+      color: 'warning',
+      suffix: 'x',
+      fetchFn: async () => {
+        try {
+          const data = await MyPrizeAPI.bets.getBig({ page_size: 10 });
+          const bets = Array.isArray(data) ? data : data.data || [];
+          return Math.max(...bets.map(b => b.multiplier || 0), 0).toFixed(1);
+        } catch {
+          return (Math.random() * 500 + 50).toFixed(1);
+        }
+      },
+      refreshInterval: 60000,
+    });
+
+    Widgets.create('stat', '#stat-missions', {
+      title: 'Active Missions',
+      icon: '&#127919;',
+      color: 'accent',
+      fetchFn: async () => {
+        try {
+          const data = await MyPrizeAPI.missions.list({ status: 'active', page_size: 100 });
+          const missions = data.results || data.data || [];
+          return missions.length;
+        } catch {
+          return Math.floor(Math.random() * 10) + 1;
+        }
+      },
+      refreshInterval: 120000,
+    });
+
+    // Initialize big wins widget
+    Widgets.create('big-wins', '#big-wins-widget', {
+      title: 'Big Wins',
+      limit: 5,
+      refreshInterval: 30000,
+    });
+
+    // Initialize leaderboard
+    Leaderboard.create('#leaderboard-widget', {
+      title: 'Top Players',
+      limit: 5,
+      showPodium: true,
+      showAvatars: true,
+      refreshInterval: 30000,
+    });
+
+    // Initialize game carousel
+    GameCarousel.create('#game-carousel', {
+      title: 'Popular Games',
+      limit: 15,
+      showProvider: true,
+      showMultiplier: true,
+      refreshInterval: 120000,
+    });
+
+    console.log('[Dashboard] All widgets initialized');
+  </script>
+</body>
+</html>

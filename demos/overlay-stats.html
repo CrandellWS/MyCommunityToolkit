@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-overlay="true">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats Overlay - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+  <link rel="stylesheet" href="../src/styles/overlay.css">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .overlay-container {
+      padding: 20px;
+    }
+
+    .stats-widget {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Horizontal layout */
+    .stats-widget.layout-horizontal {
+      flex-direction: row;
+    }
+
+    /* Vertical layout */
+    .stats-widget.layout-vertical {
+      flex-direction: column;
+      width: 180px;
+    }
+
+    /* Grid layout */
+    .stats-widget.layout-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 360px;
+    }
+
+    .stat-card {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 20px;
+      text-align: center;
+      min-width: 140px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card-icon {
+      font-size: 1.25rem;
+    }
+
+    .stat-card-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-card-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.1;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+
+    .stat-card-value.text-primary {
+      color: var(--color-primary-400);
+      text-shadow: 0 0 10px var(--color-primary-500);
+    }
+
+    .stat-card-value.text-accent {
+      color: var(--color-accent-400);
+      text-shadow: 0 0 10px var(--color-accent-500);
+    }
+
+    .stat-card-value.text-success {
+      color: #4ade80;
+      text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    }
+
+    .stat-card-value.text-warning {
+      color: #fbbf24;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    }
+
+    .stat-card-value.text-error {
+      color: #f87171;
+      text-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+    }
+
+    .value-prefix,
+    .value-suffix {
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+
+    .stat-card-change {
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+
+    .change-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .change-indicator.positive {
+      background: rgba(74, 222, 128, 0.2);
+      color: #4ade80;
+    }
+
+    .change-indicator.negative {
+      background: rgba(248, 113, 113, 0.2);
+      color: #f87171;
+    }
+
+    /* Compact mode */
+    .stats-widget.compact .stat-card {
+      padding: 12px 16px;
+      min-width: 120px;
+    }
+
+    .stats-widget.compact .stat-card-value {
+      font-size: 1.5rem;
+    }
+
+    .stats-widget.compact .stat-card-title {
+      font-size: 0.7rem;
+    }
+
+    /* Large mode */
+    .stats-widget.large .stat-card {
+      padding: 24px 32px;
+      min-width: 180px;
+    }
+
+    .stats-widget.large .stat-card-value {
+      font-size: 3rem;
+    }
+
+    .stats-widget.large .stat-card-title {
+      font-size: 0.9rem;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.1) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s ease-in-out infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Number animation pulse */
+    @keyframes value-update {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .value-updated {
+      animation: value-update 0.3s ease-out;
+    }
+  </style>
+</head>
+<body class="overlay-mode">
+  <div class="overlay-container overlay-position-bottom-left">
+    <div id="stats-widget" class="stats-widget layout-horizontal" role="region" aria-label="Live Statistics"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../src/utils/api-client.js"></script>
+  <script src="../src/components/widgets.js"></script>
+  <script>
+    // Configuration from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const config = {
+      roomId: params.get('room') || null,
+      position: params.get('position') || 'bottom-left',
+      layout: params.get('layout') || 'horizontal', // horizontal, vertical, grid
+      size: params.get('size') || 'normal', // compact, normal, large
+      theme: params.get('theme') || 'dark-glass',
+      scale: parseFloat(params.get('scale') || '1'),
+      chromakey: params.get('chromakey') || null,
+      refreshInterval: parseInt(params.get('refresh') || '30000', 10),
+      stats: (params.get('stats') || 'viewers,wins,multiplier').split(','),
+      demo: params.get('demo') === 'true',
+    };
+
+    // Apply configuration
+    document.documentElement.setAttribute('data-scale', config.scale);
+    if (config.chromakey) {
+      document.documentElement.setAttribute('data-chromakey', config.chromakey);
+    }
+
+    // Set position
+    const container = document.querySelector('.overlay-container');
+    container.classList.remove('overlay-position-bottom-left');
+    container.classList.add(`overlay-position-${config.position}`);
+
+    // Apply theme
+    if (config.theme) {
+      document.body.classList.add(`theme-${config.theme}`);
+    }
+
+    // Apply layout
+    const widget = document.getElementById('stats-widget');
+    widget.classList.remove('layout-horizontal');
+    widget.classList.add(`layout-${config.layout}`);
+
+    // Apply size
+    if (config.size !== 'normal') {
+      widget.classList.add(config.size);
+    }
+
+    // Stat configurations
+    const statConfigs = {
+      viewers: {
+        title: 'Viewers',
+        icon: '&#128065;',
+        color: 'primary',
+        prefix: '',
+        suffix: '',
+        fetch: async () => {
+          const data = await MyPrizeAPI.users.getStats();
+          return data.activeUserCount || 0;
+        },
+        demo: () => Math.floor(Math.random() * 500) + 100,
+      },
+      wins: {
+        title: 'Today\'s Wins',
+        icon: '&#127942;',
+        color: 'success',
+        prefix: '',
+        suffix: '',
+        fetch: async () => {
+          const data = await MyPrizeAPI.bets.getWins({ page_size: 100 });
+          const wins = Array.isArray(data) ? data : data.data || [];
+          return wins.length;
+        },
+        demo: () => Math.floor(Math.random() * 200) + 50,
+      },
+      multiplier: {
+        title: 'Top Multi',
+        icon: '&#128640;',
+        color: 'warning',
+        prefix: '',
+        suffix: 'x',
+        fetch: async () => {
+          const data = await MyPrizeAPI.bets.getBig({ page_size: 10 });
+          const bets = Array.isArray(data) ? data : data.data || [];
+          const maxMultiplier = Math.max(...bets.map(b => b.multiplier || 0), 0);
+          return maxMultiplier.toFixed(1);
+        },
+        demo: () => (Math.random() * 500 + 50).toFixed(1),
+      },
+      bigwins: {
+        title: 'Big Wins',
+        icon: '&#128176;',
+        color: 'accent',
+        prefix: '$',
+        suffix: '',
+        fetch: async () => {
+          const data = await MyPrizeAPI.bets.getBig({ page_size: 1 });
+          const bets = Array.isArray(data) ? data : data.data || [];
+          return bets[0]?.amount_won || 0;
+        },
+        demo: () => Math.floor(Math.random() * 50000) + 1000,
+      },
+      missions: {
+        title: 'Missions',
+        icon: '&#127919;',
+        color: 'primary',
+        prefix: '',
+        suffix: '',
+        fetch: async () => {
+          const data = await MyPrizeAPI.missions.list({ status: 'active', page_size: 100 });
+          const missions = data.results || data.data || [];
+          return missions.length;
+        },
+        demo: () => Math.floor(Math.random() * 10) + 1,
+      },
+      players: {
+        title: 'Active Players',
+        icon: '&#128100;',
+        color: 'success',
+        prefix: '',
+        suffix: '',
+        fetch: async () => {
+          const data = await MyPrizeAPI.users.getStats();
+          return data.activeUserCount || 0;
+        },
+        demo: () => Math.floor(Math.random() * 300) + 50,
+      },
+    };
+
+    // Create stat cards
+    const statsToShow = config.stats.filter(s => statConfigs[s]);
+    const statValues = {};
+
+    widget.innerHTML = statsToShow.map(statKey => {
+      const stat = statConfigs[statKey];
+      statValues[statKey] = { current: 0, previous: null };
+
+      return `
+        <div class="stat-card" data-stat="${statKey}" role="group" aria-label="${stat.title}">
+          <div class="stat-card-header">
+            <span class="stat-card-icon" aria-hidden="true">${stat.icon}</span>
+            <span class="stat-card-title">${stat.title}</span>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-value text-${stat.color}" aria-live="polite">
+              <span class="value-prefix">${stat.prefix}</span>
+              <span class="value-number">-</span>
+              <span class="value-suffix">${stat.suffix}</span>
+            </div>
+            <div class="stat-card-change"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Update stat display
+    function updateStat(statKey, value) {
+      const card = widget.querySelector(`[data-stat="${statKey}"]`);
+      if (!card) return;
+
+      const stat = statConfigs[statKey];
+      const valueEl = card.querySelector('.value-number');
+      const changeEl = card.querySelector('.stat-card-change');
+
+      const oldValue = statValues[statKey].current;
+      statValues[statKey].previous = oldValue;
+      statValues[statKey].current = value;
+
+      // Animate number change
+      animateNumber(valueEl, oldValue, value);
+
+      // Add update pulse
+      valueEl.classList.add('value-updated');
+      setTimeout(() => valueEl.classList.remove('value-updated'), 300);
+
+      // Show change indicator if we have previous value
+      if (statValues[statKey].previous !== null) {
+        const diff = value - statValues[statKey].previous;
+        if (diff !== 0) {
+          const isPositive = diff > 0;
+          changeEl.innerHTML = `
+            <span class="change-indicator ${isPositive ? 'positive' : 'negative'}">
+              ${isPositive ? '&#9650;' : '&#9660;'}
+              ${Math.abs(diff).toLocaleString()}
+            </span>
+          `;
+
+          // Clear change indicator after a few seconds
+          setTimeout(() => {
+            changeEl.innerHTML = '';
+          }, 5000);
+        }
+      }
+    }
+
+    function animateNumber(element, from, to, duration = 500) {
+      // Handle string values (like multipliers)
+      const toNum = parseFloat(to) || 0;
+      const fromNum = parseFloat(from) || 0;
+      const isFloat = String(to).includes('.');
+
+      const startTime = performance.now();
+      const diff = toNum - fromNum;
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = fromNum + (diff * easeOut);
+
+        if (isFloat) {
+          element.textContent = current.toFixed(1);
+        } else {
+          element.textContent = Math.round(current).toLocaleString();
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          if (isFloat) {
+            element.textContent = toNum.toFixed(1);
+          } else {
+            element.textContent = toNum.toLocaleString();
+          }
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }
+
+    // Fetch and update stats
+    async function refreshStats() {
+      for (const statKey of statsToShow) {
+        const stat = statConfigs[statKey];
+        try {
+          let value;
+          if (config.demo) {
+            value = stat.demo();
+          } else {
+            value = await stat.fetch();
+          }
+          updateStat(statKey, value);
+        } catch (error) {
+          console.error(`[Stats] Error fetching ${statKey}:`, error);
+        }
+      }
+    }
+
+    // Initial fetch
+    refreshStats();
+
+    // Periodic refresh
+    setInterval(refreshStats, config.refreshInterval);
+
+    console.log('[Overlay] Stats widget initialized with config:', config);
+  </script>
+</body>
+</html>

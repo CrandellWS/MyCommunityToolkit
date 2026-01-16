@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-overlay="true">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard Overlay - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+  <link rel="stylesheet" href="../src/styles/overlay.css">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .overlay-container {
+      padding: 20px;
+    }
+
+    .leaderboard-widget {
+      width: 340px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .leaderboard-icon {
+      font-size: 1.5rem;
+    }
+
+    .card-body {
+      padding: 12px 16px 16px;
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .leaderboard-entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .leaderboard-entry:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Podium styles */
+    .leaderboard-entry.podium-gold {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05));
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .leaderboard-entry.podium-silver {
+      background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.05));
+      border: 1px solid rgba(192, 192, 192, 0.3);
+    }
+
+    .leaderboard-entry.podium-bronze {
+      background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.05));
+      border: 1px solid rgba(205, 127, 50, 0.3);
+    }
+
+    .leaderboard-entry.highlighted {
+      border: 2px solid var(--color-primary-500);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .entry-rank {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+    }
+
+    .rank-number {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .medal {
+      font-size: 1.8rem;
+    }
+
+    .rank-change-icon {
+      font-size: 0.7rem;
+      margin-left: 4px;
+    }
+
+    .rank-change-icon.up {
+      color: #4ade80;
+    }
+
+    .rank-change-icon.down {
+      color: #f87171;
+    }
+
+    .entry-user {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .entry-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .entry-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .entry-username {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .entry-score {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .score-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #4ade80;
+    }
+
+    .score-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Rank change animations */
+    .rank-up {
+      animation: rank-up 0.5s ease-out;
+    }
+
+    .rank-down {
+      animation: rank-down 0.5s ease-out;
+    }
+
+    @keyframes rank-up {
+      0% {
+        transform: translateY(10px);
+        background: rgba(74, 222, 128, 0.2);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes rank-down {
+      0% {
+        transform: translateY(-10px);
+        background: rgba(248, 113, 113, 0.2);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Skeleton loading */
+    .skeleton-entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.1) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s ease-in-out infinite;
+      border-radius: 4px;
+    }
+
+    .skeleton-rank {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+
+    .skeleton-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+
+    .skeleton-text {
+      flex: 1;
+      height: 16px;
+    }
+
+    .skeleton-score {
+      width: 60px;
+      height: 20px;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body class="overlay-mode">
+  <div class="overlay-container overlay-position-top-left">
+    <div id="leaderboard-widget"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../src/utils/api-client.js"></script>
+  <script src="../src/components/widgets.js"></script>
+  <script src="../src/components/leaderboard.js"></script>
+  <script>
+    // Configuration from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const config = {
+      roomId: params.get('room') || null,
+      missionId: params.get('mission') || null,
+      limit: parseInt(params.get('limit') || '5', 10),
+      position: params.get('position') || 'top-left',
+      theme: params.get('theme') || 'dark-glass',
+      scale: parseFloat(params.get('scale') || '1'),
+      chromakey: params.get('chromakey') || null,
+      refreshInterval: parseInt(params.get('refresh') || '30000', 10),
+      highlightUser: params.get('highlight') || null,
+      showAvatars: params.get('avatars') !== 'false',
+      showPodium: params.get('podium') !== 'false',
+      demo: params.get('demo') === 'true',
+    };
+
+    // Apply configuration
+    document.documentElement.setAttribute('data-scale', config.scale);
+    if (config.chromakey) {
+      document.documentElement.setAttribute('data-chromakey', config.chromakey);
+    }
+
+    // Set position
+    const container = document.querySelector('.overlay-container');
+    container.classList.remove('overlay-position-top-left');
+    container.classList.add(`overlay-position-${config.position}`);
+
+    // Apply theme
+    if (config.theme) {
+      document.body.classList.add(`theme-${config.theme}`);
+    }
+
+    // Initialize widget
+    const leaderboardWidget = Leaderboard.create('#leaderboard-widget', {
+      title: 'Leaderboard',
+      limit: config.limit,
+      roomId: config.roomId,
+      missionId: config.missionId,
+      refreshInterval: config.refreshInterval,
+      showAvatars: config.showAvatars,
+      showPodium: config.showPodium,
+      animateChanges: true,
+      highlightUser: config.highlightUser,
+    });
+
+    // Demo mode with sample data
+    if (config.demo) {
+      const demoData = [
+        { rank: 1, username: 'LuckyStreamer', score: 125750, change: 0 },
+        { rank: 2, username: 'WinMaster99', score: 98420, change: 1 },
+        { rank: 3, username: 'SlotKing', score: 87650, change: -1 },
+        { rank: 4, username: 'CryptoGamer', score: 65320, change: 2 },
+        { rank: 5, username: 'ProPlayer', score: 54890, change: 0 },
+      ];
+
+      const listEl = document.querySelector('.leaderboard-list');
+      if (listEl) {
+        listEl.innerHTML = demoData.slice(0, config.limit).map((entry, index) => {
+          const medals = ['&#129351;', '&#129352;', '&#129353;'];
+          const podiumClasses = ['podium-gold', 'podium-silver', 'podium-bronze'];
+          const isHighlighted = config.highlightUser &&
+            entry.username.toLowerCase() === config.highlightUser.toLowerCase();
+
+          return `
+            <div class="leaderboard-entry ${index < 3 && config.showPodium ? podiumClasses[index] : ''} ${isHighlighted ? 'highlighted' : ''} animate-fade-in-left"
+                 style="animation-delay: ${index * 50}ms">
+              <div class="entry-rank">
+                ${index < 3 && config.showPodium
+                  ? `<span class="medal">${medals[index]}</span>`
+                  : `<span class="rank-number">${entry.rank}</span>`
+                }
+                ${entry.change > 0 ? '<span class="rank-change-icon up">&#9650;</span>' : ''}
+                ${entry.change < 0 ? '<span class="rank-change-icon down">&#9660;</span>' : ''}
+              </div>
+              <div class="entry-user">
+                ${config.showAvatars ? `
+                  <div class="entry-avatar">
+                    <span class="avatar-placeholder">${entry.username.charAt(0)}</span>
+                  </div>
+                ` : ''}
+                <span class="entry-username">${entry.username}</span>
+              </div>
+              <div class="entry-score">
+                <span class="score-value">${formatScore(entry.score)}</span>
+                <span class="score-label">pts</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Simulate rank changes periodically
+      setInterval(() => {
+        // Randomly adjust scores and re-sort
+        demoData.forEach(entry => {
+          entry.score += Math.floor((Math.random() - 0.3) * 5000);
+          entry.score = Math.max(0, entry.score);
+        });
+        demoData.sort((a, b) => b.score - a.score);
+        demoData.forEach((entry, i) => {
+          const oldRank = entry.rank;
+          entry.rank = i + 1;
+          entry.change = oldRank - entry.rank;
+        });
+
+        // Re-render
+        if (listEl) {
+          listEl.innerHTML = demoData.slice(0, config.limit).map((entry, index) => {
+            const medals = ['&#129351;', '&#129352;', '&#129353;'];
+            const podiumClasses = ['podium-gold', 'podium-silver', 'podium-bronze'];
+            const changeClass = entry.change > 0 ? 'rank-up' : entry.change < 0 ? 'rank-down' : '';
+
+            return `
+              <div class="leaderboard-entry ${index < 3 && config.showPodium ? podiumClasses[index] : ''} ${changeClass}">
+                <div class="entry-rank">
+                  ${index < 3 && config.showPodium
+                    ? `<span class="medal">${medals[index]}</span>`
+                    : `<span class="rank-number">${entry.rank}</span>`
+                  }
+                  ${entry.change > 0 ? '<span class="rank-change-icon up">&#9650;</span>' : ''}
+                  ${entry.change < 0 ? '<span class="rank-change-icon down">&#9660;</span>' : ''}
+                </div>
+                <div class="entry-user">
+                  ${config.showAvatars ? `
+                    <div class="entry-avatar">
+                      <span class="avatar-placeholder">${entry.username.charAt(0)}</span>
+                    </div>
+                  ` : ''}
+                  <span class="entry-username">${entry.username}</span>
+                </div>
+                <div class="entry-score">
+                  <span class="score-value">${formatScore(entry.score)}</span>
+                  <span class="score-label">pts</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }, 5000);
+    }
+
+    function formatScore(score) {
+      if (score >= 1000000) return (score / 1000000).toFixed(1) + 'M';
+      if (score >= 1000) return (score / 1000).toFixed(1) + 'K';
+      return new Intl.NumberFormat().format(Math.round(score));
+    }
+
+    console.log('[Overlay] Leaderboard widget initialized with config:', config);
+  </script>
+</body>
+</html>

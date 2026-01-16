@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Theme Demo - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      padding: var(--space-8);
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: var(--space-8);
+    }
+
+    .demo-title {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--space-2);
+    }
+
+    .demo-subtitle {
+      color: var(--color-neutral-500);
+    }
+
+    .theme-controls {
+      max-width: 800px;
+      margin: 0 auto var(--space-8);
+      padding: var(--space-6);
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--card-border);
+    }
+
+    .control-section {
+      margin-bottom: var(--space-6);
+    }
+
+    .control-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-section-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-4);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .control-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutral-600);
+    }
+
+    .theme-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    .theme-preset {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      background: var(--color-neutral-100);
+      border: 2px solid transparent;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .theme-preset:hover {
+      background: var(--color-neutral-200);
+    }
+
+    .theme-preset.active {
+      border-color: var(--color-primary-500);
+      background: var(--color-primary-50);
+    }
+
+    .theme-preset-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-neutral-300);
+    }
+
+    .theme-preset-preview.light { background: linear-gradient(135deg, #f8fafc, #e2e8f0); }
+    .theme-preset-preview.dark { background: linear-gradient(135deg, #1e293b, #0f172a); }
+    .theme-preset-preview.neon { background: linear-gradient(135deg, #0f172a, #00ffff); }
+    .theme-preset-preview.sunset { background: linear-gradient(135deg, #f97316, #ec4899); }
+    .theme-preset-preview.forest { background: linear-gradient(135deg, #22c55e, #84cc16); }
+
+    .theme-preset-name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .color-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    input[type="color"] {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border: 2px solid var(--color-neutral-300);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border-radius: var(--radius-md);
+    }
+
+    .color-value {
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+    }
+
+    .radius-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .radius-option {
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-neutral-100);
+      border: 2px solid transparent;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .radius-option:hover {
+      background: var(--color-neutral-200);
+    }
+
+    .radius-option.active {
+      border-color: var(--color-primary-500);
+      background: var(--color-primary-50);
+    }
+
+    /* Preview section */
+    .preview-section {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .preview-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-4);
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .preview-card {
+      padding: var(--space-6);
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-shadow);
+    }
+
+    .preview-card h3 {
+      font-size: var(--font-size-lg);
+      margin-bottom: var(--space-3);
+    }
+
+    .preview-card p {
+      color: var(--color-neutral-600);
+      margin-bottom: var(--space-4);
+    }
+
+    .button-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .color-swatches {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+    }
+
+    .swatch-primary { background: var(--color-primary-500); }
+    .swatch-accent { background: var(--color-accent-500); }
+    .swatch-success { background: var(--color-success); }
+    .swatch-warning { background: var(--color-warning); }
+    .swatch-error { background: var(--color-error); }
+
+    .toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      background: var(--color-neutral-300);
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background var(--duration-normal) var(--ease-out);
+    }
+
+    .toggle.active {
+      background: var(--color-primary-500);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: #ffffff;
+      border-radius: var(--radius-full);
+      transition: transform var(--duration-normal) var(--ease-out);
+    }
+
+    .toggle.active .toggle-slider {
+      transform: translateX(22px);
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: var(--space-4);
+      }
+
+      .theme-controls {
+        padding: var(--space-4);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="demo-header">
+    <h1 class="demo-title text-gradient">Custom Theme Builder</h1>
+    <p class="demo-subtitle">Customize the look and feel of your streamer toolkit</p>
+  </header>
+
+  <main>
+    <section class="theme-controls" aria-label="Theme customization">
+      <!-- Theme Presets -->
+      <div class="control-section">
+        <h2 class="control-section-title">Theme Preset</h2>
+        <div class="theme-presets" role="radiogroup" aria-label="Select theme preset">
+          <button class="theme-preset" data-theme="light" role="radio" aria-checked="false">
+            <div class="theme-preset-preview light"></div>
+            <span class="theme-preset-name">Light</span>
+          </button>
+          <button class="theme-preset active" data-theme="dark" role="radio" aria-checked="true">
+            <div class="theme-preset-preview dark"></div>
+            <span class="theme-preset-name">Dark</span>
+          </button>
+          <button class="theme-preset" data-theme="neon" role="radio" aria-checked="false">
+            <div class="theme-preset-preview neon"></div>
+            <span class="theme-preset-name">Neon</span>
+          </button>
+          <button class="theme-preset" data-theme="sunset" role="radio" aria-checked="false">
+            <div class="theme-preset-preview sunset"></div>
+            <span class="theme-preset-name">Sunset</span>
+          </button>
+          <button class="theme-preset" data-theme="forest" role="radio" aria-checked="false">
+            <div class="theme-preset-preview forest"></div>
+            <span class="theme-preset-name">Forest</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Colors -->
+      <div class="control-section">
+        <h2 class="control-section-title">Custom Colors</h2>
+        <div class="control-grid">
+          <div class="control-item">
+            <label class="control-label" for="primary-color">Primary Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="primary-color" value="#3b82f6" aria-label="Primary color picker">
+              <span class="color-value" id="primary-value">#3b82f6</span>
+            </div>
+          </div>
+          <div class="control-item">
+            <label class="control-label" for="accent-color">Accent Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="accent-color" value="#22c55e" aria-label="Accent color picker">
+              <span class="color-value" id="accent-value">#22c55e</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Border Radius -->
+      <div class="control-section">
+        <h2 class="control-section-title">Border Radius</h2>
+        <div class="radius-options" role="radiogroup" aria-label="Select border radius">
+          <button class="radius-option" data-radius="none" role="radio" aria-checked="false">None</button>
+          <button class="radius-option" data-radius="sm" role="radio" aria-checked="false">Small</button>
+          <button class="radius-option" data-radius="md" role="radio" aria-checked="false">Medium</button>
+          <button class="radius-option active" data-radius="lg" role="radio" aria-checked="true">Large</button>
+          <button class="radius-option" data-radius="xl" role="radio" aria-checked="false">X-Large</button>
+          <button class="radius-option" data-radius="full" role="radio" aria-checked="false">Full</button>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="control-section">
+        <h2 class="control-section-title">Options</h2>
+        <div class="control-grid">
+          <div class="control-item">
+            <div class="toggle-wrapper">
+              <button class="toggle active" id="toggle-animations" role="switch" aria-checked="true" aria-label="Enable animations">
+                <span class="toggle-slider"></span>
+              </button>
+              <span class="control-label">Enable Animations</span>
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="toggle-wrapper">
+              <button class="toggle active" id="toggle-glow" role="switch" aria-checked="true" aria-label="Enable glow effects">
+                <span class="toggle-slider"></span>
+              </button>
+              <span class="control-label">Enable Glow Effects</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Preview -->
+    <section class="preview-section" aria-label="Theme preview">
+      <h2 class="preview-title">Live Preview</h2>
+      <div class="preview-grid">
+        <div class="preview-card">
+          <h3>Color Palette</h3>
+          <div class="color-swatches">
+            <div class="color-swatch swatch-primary" title="Primary"></div>
+            <div class="color-swatch swatch-accent" title="Accent"></div>
+            <div class="color-swatch swatch-success" title="Success"></div>
+            <div class="color-swatch swatch-warning" title="Warning"></div>
+            <div class="color-swatch swatch-error" title="Error"></div>
+          </div>
+          <p>Your current color palette applied throughout the toolkit.</p>
+        </div>
+
+        <div class="preview-card">
+          <h3>Buttons</h3>
+          <div class="button-preview">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-accent">Accent</button>
+            <button class="btn btn-ghost">Ghost</button>
+          </div>
+        </div>
+
+        <div class="preview-card">
+          <h3>Badges</h3>
+          <p>Various badge styles:</p>
+          <div class="button-preview">
+            <span class="badge badge-primary">Primary</span>
+            <span class="badge badge-success">Success</span>
+            <span class="badge badge-warning">Warning</span>
+            <span class="badge badge-error">Error</span>
+          </div>
+        </div>
+
+        <div class="preview-card">
+          <h3>Progress Bar</h3>
+          <p>Loading progress indicator:</p>
+          <div class="progress" style="margin-top: var(--space-2);">
+            <div class="progress-bar" style="width: 65%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="../src/config/theme-config.js"></script>
+  <script>
+    // Initialize theme if ThemeConfig is available
+    if (typeof ThemeConfig !== 'undefined') {
+      ThemeConfig.init();
+    }
+
+    // Theme preset buttons
+    document.querySelectorAll('.theme-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active state
+        document.querySelectorAll('.theme-preset').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+
+        // Apply theme
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // Update ThemeConfig if available
+        if (typeof ThemeConfig !== 'undefined') {
+          ThemeConfig.set('theme', theme);
+        }
+      });
+    });
+
+    // Color pickers
+    const primaryInput = document.getElementById('primary-color');
+    const primaryValue = document.getElementById('primary-value');
+    const accentInput = document.getElementById('accent-color');
+    const accentValue = document.getElementById('accent-value');
+
+    primaryInput.addEventListener('input', () => {
+      const color = primaryInput.value;
+      primaryValue.textContent = color;
+      document.documentElement.style.setProperty('--color-primary-500', color);
+      if (typeof ThemeConfig !== 'undefined') {
+        ThemeConfig.set('primaryColor', color);
+      }
+    });
+
+    accentInput.addEventListener('input', () => {
+      const color = accentInput.value;
+      accentValue.textContent = color;
+      document.documentElement.style.setProperty('--color-accent-500', color);
+      if (typeof ThemeConfig !== 'undefined') {
+        ThemeConfig.set('accentColor', color);
+      }
+    });
+
+    // Border radius options
+    const radiusMap = {
+      none: '0',
+      sm: '0.25rem',
+      md: '0.375rem',
+      lg: '0.5rem',
+      xl: '0.75rem',
+      full: '9999px',
+    };
+
+    document.querySelectorAll('.radius-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.radius-option').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+
+        const radius = radiusMap[btn.dataset.radius];
+        document.documentElement.style.setProperty('--radius-lg', radius);
+        document.documentElement.style.setProperty('--card-radius', radius);
+        document.documentElement.style.setProperty('--btn-radius', radius);
+      });
+    });
+
+    // Toggle buttons
+    document.querySelectorAll('.toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const isActive = toggle.classList.toggle('active');
+        toggle.setAttribute('aria-checked', isActive);
+
+        if (toggle.id === 'toggle-animations') {
+          document.body.classList.toggle('no-animations', !isActive);
+        } else if (toggle.id === 'toggle-glow') {
+          document.body.classList.toggle('no-glow', !isActive);
+        }
+      });
+    });
+
+    console.log('[Theme Demo] Custom theme builder initialized');
+  </script>
+</body>
+</html>

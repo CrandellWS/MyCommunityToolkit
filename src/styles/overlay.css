@@ -1,0 +1,578 @@
+/**
+ * MyPrize Streamer Toolkit - OBS Overlay Styles
+ * Optimized styles for streaming overlays and browser sources
+ */
+
+/* ============================================
+   1. OVERLAY MODE BASE
+   ============================================ */
+
+[data-overlay="true"],
+.overlay-mode {
+  /* Transparent background for OBS */
+  background: transparent !important;
+
+  /* Remove all borders and shadows that might show */
+  --card-bg: transparent;
+  --card-border: transparent;
+  --card-shadow: none;
+
+  /* Larger text for stream visibility */
+  font-size: 1.25rem;
+
+  /* High contrast text shadow for readability */
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 2px 4px rgba(0, 0, 0, 0.6);
+
+  /* Prevent any scrolling */
+  overflow: hidden;
+}
+
+/* ============================================
+   2. CHROMAKEY BACKGROUNDS
+   ============================================ */
+
+/* Green screen background */
+[data-chromakey="green"],
+.chromakey-green {
+  background-color: #00ff00 !important;
+}
+
+/* Blue screen background */
+[data-chromakey="blue"],
+.chromakey-blue {
+  background-color: #0000ff !important;
+}
+
+/* Magenta screen background */
+[data-chromakey="magenta"],
+.chromakey-magenta {
+  background-color: #ff00ff !important;
+}
+
+/* Fully transparent */
+[data-chromakey="transparent"],
+.chromakey-transparent {
+  background-color: transparent !important;
+}
+
+/* ============================================
+   3. OVERLAY CARD STYLES
+   ============================================ */
+
+.overlay-mode .card {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+}
+
+.overlay-mode .card-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.overlay-mode .card-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* ============================================
+   4. OVERLAY TEXT STYLES
+   ============================================ */
+
+.overlay-mode,
+.overlay-mode * {
+  color: #ffffff;
+}
+
+.overlay-mode .text-muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.overlay-mode .text-primary {
+  color: var(--color-primary-400);
+}
+
+.overlay-mode .text-accent {
+  color: var(--color-accent-400);
+}
+
+.overlay-mode .text-success {
+  color: #4ade80;
+}
+
+.overlay-mode .text-warning {
+  color: #fbbf24;
+}
+
+.overlay-mode .text-error {
+  color: #f87171;
+}
+
+/* Enhanced text shadow for better readability */
+.overlay-mode .stat-card-value,
+.overlay-mode .win-amount,
+.overlay-mode .entry-score,
+.overlay-mode .momentum-number {
+  text-shadow:
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================
+   5. OVERLAY WIDGET STYLES
+   ============================================ */
+
+/* Big Wins Widget */
+.overlay-mode .big-wins-widget {
+  max-width: 400px;
+}
+
+.overlay-mode .win-item {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.overlay-mode .win-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.overlay-mode .win-multiplier {
+  font-size: 1.1rem;
+  background: rgba(34, 197, 94, 0.3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+/* Leaderboard Widget */
+.overlay-mode .leaderboard-widget {
+  max-width: 350px;
+}
+
+.overlay-mode .leaderboard-entry {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.overlay-mode .leaderboard-entry.podium-gold {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(251, 191, 36, 0.1));
+  border: 1px solid rgba(251, 191, 36, 0.5);
+}
+
+.overlay-mode .leaderboard-entry.podium-silver {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(192, 192, 192, 0.1));
+  border: 1px solid rgba(192, 192, 192, 0.5);
+}
+
+.overlay-mode .leaderboard-entry.podium-bronze {
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(205, 127, 50, 0.1));
+  border: 1px solid rgba(205, 127, 50, 0.5);
+}
+
+.overlay-mode .entry-score .score-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.overlay-mode .medal {
+  font-size: 2rem;
+}
+
+/* Momentum Meter */
+.overlay-mode .momentum-widget {
+  max-width: 300px;
+}
+
+.overlay-mode .momentum-bar {
+  height: 24px;
+  background: linear-gradient(90deg,
+    #3b82f6 0%,
+    #22c55e 33%,
+    #f59e0b 66%,
+    #ef4444 100%
+  );
+  border-radius: var(--radius-full);
+  position: relative;
+}
+
+.overlay-mode .momentum-indicator {
+  width: 8px;
+  height: 32px;
+  background: #ffffff;
+  border-radius: var(--radius-sm);
+  position: absolute;
+  top: -4px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.overlay-mode .momentum-number {
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+/* Stat Cards */
+.overlay-mode .stat-card {
+  text-align: center;
+}
+
+.overlay-mode .stat-card-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.overlay-mode .stat-card-title {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   6. OVERLAY POSITIONS
+   ============================================ */
+
+/* Position helpers for OBS placement */
+.overlay-position-top-left {
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+}
+
+.overlay-position-top-right {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.overlay-position-bottom-left {
+  position: fixed;
+  bottom: var(--space-4);
+  left: var(--space-4);
+}
+
+.overlay-position-bottom-right {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+}
+
+.overlay-position-top-center {
+  position: fixed;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.overlay-position-bottom-center {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.overlay-position-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ============================================
+   7. OVERLAY SCALE OPTIONS
+   ============================================ */
+
+[data-scale="0.75"],
+.overlay-scale-75 {
+  transform: scale(0.75);
+  transform-origin: top left;
+}
+
+[data-scale="1"],
+.overlay-scale-100 {
+  transform: scale(1);
+}
+
+[data-scale="1.25"],
+.overlay-scale-125 {
+  transform: scale(1.25);
+  transform-origin: top left;
+}
+
+[data-scale="1.5"],
+.overlay-scale-150 {
+  transform: scale(1.5);
+  transform-origin: top left;
+}
+
+[data-scale="2"],
+.overlay-scale-200 {
+  transform: scale(2);
+  transform-origin: top left;
+}
+
+/* ============================================
+   8. OVERLAY ANIMATIONS
+   ============================================ */
+
+/* Reduced animation mode for performance */
+.overlay-mode.reduced-animations *,
+.overlay-mode.reduced-animations *::before,
+.overlay-mode.reduced-animations *::after {
+  animation-duration: 0.1ms !important;
+  transition-duration: 0.1ms !important;
+}
+
+/* Slide in animations for new items */
+.overlay-mode .animate-slide-in-right {
+  animation: overlay-slide-in-right 0.5s ease-out;
+}
+
+.overlay-mode .animate-slide-in-left {
+  animation: overlay-slide-in-left 0.5s ease-out;
+}
+
+.overlay-mode .animate-pop-in {
+  animation: overlay-pop-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes overlay-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes overlay-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes overlay-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Glow pulse animation for highlights */
+@keyframes overlay-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+  }
+}
+
+.overlay-mode .glow-pulse {
+  animation: overlay-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   9. OVERLAY BADGES
+   ============================================ */
+
+.overlay-mode .badge {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid currentColor;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.overlay-mode .badge-success {
+  color: #4ade80;
+  border-color: #4ade80;
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.overlay-mode .badge-warning {
+  color: #fbbf24;
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.2);
+}
+
+.overlay-mode .badge-error {
+  color: #f87171;
+  border-color: #f87171;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.overlay-mode .badge-primary {
+  color: var(--color-primary-400);
+  border-color: var(--color-primary-400);
+  background: rgba(59, 130, 246, 0.2);
+}
+
+/* ============================================
+   10. OVERLAY PROGRESS BARS
+   ============================================ */
+
+.overlay-mode .progress {
+  background: rgba(255, 255, 255, 0.2);
+  height: 8px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.overlay-mode .progress-bar {
+  background: linear-gradient(90deg, var(--color-primary-500), var(--color-accent-500));
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease-out;
+}
+
+/* ============================================
+   11. DARK GLASS THEME
+   ============================================ */
+
+.overlay-mode.theme-dark-glass {
+  --card-bg: rgba(15, 23, 42, 0.85);
+}
+
+.overlay-mode.theme-dark-glass .card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   12. NEON OVERLAY THEME
+   ============================================ */
+
+.overlay-mode.theme-neon {
+  --color-primary-400: #00ffff;
+  --color-accent-400: #ff00ff;
+}
+
+.overlay-mode.theme-neon .card {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #00ffff;
+  box-shadow:
+    0 0 10px #00ffff,
+    0 0 20px rgba(0, 255, 255, 0.5),
+    inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.overlay-mode.theme-neon .card-title {
+  color: #00ffff;
+  text-shadow:
+    0 0 10px #00ffff,
+    0 0 20px #00ffff;
+}
+
+.overlay-mode.theme-neon .win-amount,
+.overlay-mode.theme-neon .text-success {
+  color: #00ff00;
+  text-shadow:
+    0 0 10px #00ff00,
+    0 0 20px #00ff00;
+}
+
+/* ============================================
+   13. COMPACT OVERLAY MODE
+   ============================================ */
+
+.overlay-mode.compact {
+  font-size: 1rem;
+}
+
+.overlay-mode.compact .card {
+  padding: var(--space-2);
+}
+
+.overlay-mode.compact .card-header {
+  padding: var(--space-2);
+}
+
+.overlay-mode.compact .card-title {
+  font-size: 1rem;
+}
+
+.overlay-mode.compact .stat-card-value {
+  font-size: 1.5rem;
+}
+
+.overlay-mode.compact .win-item,
+.overlay-mode.compact .leaderboard-entry {
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+/* ============================================
+   14. HIDE ELEMENTS IN OVERLAY
+   ============================================ */
+
+.overlay-mode .overlay-hide,
+.overlay-mode [data-overlay-hide] {
+  display: none !important;
+}
+
+/* Hide scrollbars in overlay mode */
+.overlay-mode ::-webkit-scrollbar {
+  display: none;
+}
+
+.overlay-mode {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ============================================
+   15. OVERLAY UTILITY CLASSES
+   ============================================ */
+
+/* Force transparent background */
+.overlay-transparent {
+  background: transparent !important;
+}
+
+/* Remove all shadows */
+.overlay-no-shadow {
+  box-shadow: none !important;
+}
+
+/* Remove borders */
+.overlay-no-border {
+  border: none !important;
+}
+
+/* Full width */
+.overlay-full-width {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Text outline for extreme visibility */
+.overlay-text-outline {
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.8);
+  text-stroke: 1px rgba(0, 0, 0, 0.8);
+}

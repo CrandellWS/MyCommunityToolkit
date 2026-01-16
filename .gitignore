@@ -1,0 +1,5 @@
+# Local SSH keys - DO NOT COMMIT
+.ssh/
+
+# Logs
+ralph-logs/

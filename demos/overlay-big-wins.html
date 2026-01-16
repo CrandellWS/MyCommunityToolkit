@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-overlay="true">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Big Wins Overlay - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+  <link rel="stylesheet" href="../src/styles/overlay.css">
+
+  <style>
+    /* Page-specific overlay setup */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .overlay-container {
+      padding: 20px;
+    }
+
+    /* Custom styles for this overlay */
+    .big-wins-widget {
+      max-width: 380px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .win-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .win-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .win-game {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .win-game-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .win-game-placeholder {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .win-game-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .win-game-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .win-username {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .win-details {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .win-amount {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #4ade80;
+      text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    }
+
+    .win-multiplier {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .card-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.live {
+      background: #22c55e;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body class="overlay-mode">
+  <div class="overlay-container overlay-position-bottom-right">
+    <div id="big-wins-widget"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../src/utils/api-client.js"></script>
+  <script src="../src/components/widgets.js"></script>
+  <script>
+    // Configuration from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const config = {
+      roomId: params.get('room') || null,
+      limit: parseInt(params.get('limit') || '5', 10),
+      position: params.get('position') || 'bottom-right',
+      theme: params.get('theme') || 'dark-glass',
+      scale: parseFloat(params.get('scale') || '1'),
+      chromakey: params.get('chromakey') || null,
+      refreshInterval: parseInt(params.get('refresh') || '30000', 10),
+    };
+
+    // Apply configuration
+    document.documentElement.setAttribute('data-scale', config.scale);
+    if (config.chromakey) {
+      document.documentElement.setAttribute('data-chromakey', config.chromakey);
+    }
+
+    // Set position
+    const container = document.querySelector('.overlay-container');
+    container.classList.remove('overlay-position-bottom-right');
+    container.classList.add(`overlay-position-${config.position}`);
+
+    // Apply theme
+    if (config.theme) {
+      document.body.classList.add(`theme-${config.theme}`);
+    }
+
+    // Initialize widget
+    const bigWinsWidget = Widgets.create('big-wins', '#big-wins-widget', {
+      title: 'Big Wins',
+      limit: config.limit,
+      roomId: config.roomId,
+      refreshInterval: config.refreshInterval,
+      showHeader: true,
+      showGame: true,
+      showUser: true,
+    });
+
+    // Log initialization
+    console.log('[Overlay] Big Wins widget initialized with config:', config);
+  </script>
+</body>
+</html>

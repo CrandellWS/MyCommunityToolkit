@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Widget Example - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      padding: var(--space-8);
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: var(--space-8);
+    }
+
+    .demo-title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--space-2);
+    }
+
+    .demo-subtitle {
+      color: var(--color-neutral-500);
+    }
+
+    .code-section {
+      max-width: 900px;
+      margin: 0 auto var(--space-8);
+    }
+
+    .code-block {
+      background: var(--color-neutral-900);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      overflow-x: auto;
+      margin-bottom: var(--space-4);
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-300);
+      white-space: pre;
+    }
+
+    .code-block .comment { color: var(--color-neutral-500); }
+    .code-block .keyword { color: #c792ea; }
+    .code-block .string { color: #c3e88d; }
+    .code-block .number { color: #f78c6c; }
+    .code-block .function { color: #82aaff; }
+
+    .section-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-3);
+    }
+
+    .widget-demo {
+      max-width: 400px;
+      margin: var(--space-6) auto;
+    }
+
+    .steps-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .steps-list li {
+      display: flex;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+      padding: var(--space-4);
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--card-border);
+    }
+
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--color-primary-500);
+      color: #ffffff;
+      border-radius: var(--radius-full);
+      font-weight: var(--font-weight-bold);
+      flex-shrink: 0;
+    }
+
+    .step-content h3 {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-1);
+    }
+
+    .step-content p {
+      color: var(--color-neutral-500);
+      font-size: var(--font-size-sm);
+      margin: 0;
+    }
+
+    .inline-code {
+      font-family: var(--font-family-mono);
+      background: var(--color-neutral-800);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+    }
+  </style>
+</head>
+<body>
+  <header class="demo-header">
+    <h1 class="demo-title">Minimal Widget Integration</h1>
+    <p class="demo-subtitle">The simplest way to add a widget to your page</p>
+  </header>
+
+  <main>
+    <section class="code-section">
+      <h2 class="section-title">Quick Start Steps</h2>
+      <ol class="steps-list">
+        <li>
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <h3>Include the CSS files</h3>
+            <p>Add the stylesheet links in your HTML <span class="inline-code">&lt;head&gt;</span></p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number">2</span>
+          <div class="step-content">
+            <h3>Add a container element</h3>
+            <p>Create a <span class="inline-code">&lt;div&gt;</span> with an ID where the widget will render</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number">3</span>
+          <div class="step-content">
+            <h3>Include the JavaScript files</h3>
+            <p>Add the script tags before your widget initialization code</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number">4</span>
+          <div class="step-content">
+            <h3>Initialize the widget</h3>
+            <p>Call <span class="inline-code">Widgets.create()</span> with your container and options</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="code-section">
+      <h2 class="section-title">Complete Example</h2>
+      <div class="code-block">
+        <pre><span class="comment">&lt;!-- HTML --&gt;</span>
+<span class="keyword">&lt;!DOCTYPE html&gt;</span>
+<span class="keyword">&lt;html</span> lang=<span class="string">"en"</span> data-theme=<span class="string">"dark"</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;head&gt;</span>
+  <span class="comment">&lt;!-- Step 1: Include CSS --&gt;</span>
+  <span class="keyword">&lt;link</span> rel=<span class="string">"stylesheet"</span> href=<span class="string">"src/styles/design-system.css"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;link</span> rel=<span class="string">"stylesheet"</span> href=<span class="string">"src/styles/animations.css"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;link</span> rel=<span class="string">"stylesheet"</span> href=<span class="string">"src/styles/components.css"</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;/head&gt;</span>
+<span class="keyword">&lt;body&gt;</span>
+
+  <span class="comment">&lt;!-- Step 2: Add container --&gt;</span>
+  <span class="keyword">&lt;div</span> id=<span class="string">"my-widget"</span><span class="keyword">&gt;&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- Step 3: Include JavaScript --&gt;</span>
+  <span class="keyword">&lt;script</span> src=<span class="string">"src/utils/api-client.js"</span><span class="keyword">&gt;&lt;/script&gt;</span>
+  <span class="keyword">&lt;script</span> src=<span class="string">"src/components/widgets.js"</span><span class="keyword">&gt;&lt;/script&gt;</span>
+
+  <span class="keyword">&lt;script&gt;</span>
+    <span class="comment">// Step 4: Initialize widget</span>
+    Widgets.<span class="function">create</span>(<span class="string">'big-wins'</span>, <span class="string">'#my-widget'</span>, {
+      title: <span class="string">'Recent Big Wins'</span>,
+      limit: <span class="number">5</span>,
+      refreshInterval: <span class="number">30000</span>
+    });
+  <span class="keyword">&lt;/script&gt;</span>
+
+<span class="keyword">&lt;/body&gt;</span>
+<span class="keyword">&lt;/html&gt;</span></pre>
+      </div>
+    </section>
+
+    <section class="code-section">
+      <h2 class="section-title">Live Demo</h2>
+      <p style="color: var(--color-neutral-500); margin-bottom: var(--space-4);">
+        Here's a working Big Wins widget using the code above:
+      </p>
+      <div class="widget-demo" id="demo-widget"></div>
+    </section>
+
+    <section class="code-section">
+      <h2 class="section-title">Available Widget Types</h2>
+      <div class="code-block">
+        <pre><span class="comment">// Stat Card - Display a single statistic</span>
+Widgets.<span class="function">create</span>(<span class="string">'stat'</span>, <span class="string">'#container'</span>, {
+  title: <span class="string">'Active Users'</span>,
+  icon: <span class="string">'&#128065;'</span>,
+  color: <span class="string">'primary'</span>,
+  fetchFn: <span class="keyword">async</span> () => { <span class="keyword">return</span> <span class="number">1234</span>; }
+});
+
+<span class="comment">// Big Wins - Live feed of big wins</span>
+Widgets.<span class="function">create</span>(<span class="string">'big-wins'</span>, <span class="string">'#container'</span>, {
+  limit: <span class="number">5</span>,
+  roomId: <span class="string">'optional-room-id'</span>
+});
+
+<span class="comment">// Momentum Meter - Room activity indicator</span>
+Widgets.<span class="function">create</span>(<span class="string">'momentum'</span>, <span class="string">'#container'</span>, {
+  roomId: <span class="string">'your-room-id'</span>,
+  showLabels: <span class="keyword">true</span>
+});
+
+<span class="comment">// Missions List - Active missions</span>
+Widgets.<span class="function">create</span>(<span class="string">'missions'</span>, <span class="string">'#container'</span>, {
+  limit: <span class="number">5</span>,
+  showProgress: <span class="keyword">true</span>
+});
+
+<span class="comment">// Rate Limit Monitor - API usage</span>
+Widgets.<span class="function">create</span>(<span class="string">'rate-limit'</span>, <span class="string">'#container'</span>, {});</pre>
+      </div>
+    </section>
+
+    <section class="code-section">
+      <h2 class="section-title">Additional Widgets</h2>
+      <div class="code-block">
+        <pre><span class="comment">// Leaderboard Widget (requires leaderboard.js)</span>
+Leaderboard.<span class="function">create</span>(<span class="string">'#container'</span>, {
+  title: <span class="string">'Top Players'</span>,
+  limit: <span class="number">10</span>,
+  showPodium: <span class="keyword">true</span>,
+  showAvatars: <span class="keyword">true</span>,
+  missionId: <span class="string">'optional-mission-id'</span>
+});
+
+<span class="comment">// Game Carousel Widget (requires game-carousel.js)</span>
+GameCarousel.<span class="function">create</span>(<span class="string">'#container'</span>, {
+  title: <span class="string">'Popular Games'</span>,
+  limit: <span class="number">20</span>,
+  showProvider: <span class="keyword">true</span>,
+  autoScroll: <span class="keyword">false</span>
+});
+
+<span class="comment">// User Profile Widget (requires user-profile.js)</span>
+UserProfile.<span class="function">create</span>(<span class="string">'#container'</span>, {
+  username: <span class="string">'StreamerName'</span>,
+  showStats: <span class="keyword">true</span>,
+  showBadges: <span class="keyword">true</span>
+});</pre>
+      </div>
+    </section>
+
+    <section class="code-section">
+      <h2 class="section-title">Tips</h2>
+      <ul class="steps-list">
+        <li>
+          <span class="step-number" style="background: var(--color-success);">&#10003;</span>
+          <div class="step-content">
+            <h3>Use a Room ID for your content</h3>
+            <p>Pass <span class="inline-code">roomId: 'your-room-id'</span> to filter data to your specific room</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number" style="background: var(--color-success);">&#10003;</span>
+          <div class="step-content">
+            <h3>Adjust refresh intervals</h3>
+            <p>Set <span class="inline-code">refreshInterval</span> in milliseconds (30000 = 30 seconds)</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number" style="background: var(--color-success);">&#10003;</span>
+          <div class="step-content">
+            <h3>Use themes</h3>
+            <p>Set <span class="inline-code">data-theme="dark"</span> on your HTML element for dark mode</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="../src/utils/api-client.js"></script>
+  <script src="../src/components/widgets.js"></script>
+  <script>
+    // Initialize demo widget
+    Widgets.create('big-wins', '#demo-widget', {
+      title: 'Recent Big Wins',
+      limit: 5,
+      refreshInterval: 30000,
+    });
+
+    console.log('[Demo] Minimal widget example loaded');
+  </script>
+</body>
+</html>

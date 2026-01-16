@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-overlay="true">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momentum Meter Overlay - MyPrize Streamer Toolkit</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../src/styles/design-system.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+  <link rel="stylesheet" href="../src/styles/components.css">
+  <link rel="stylesheet" href="../src/styles/overlay.css">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .overlay-container {
+      padding: 20px;
+    }
+
+    .momentum-widget {
+      width: 280px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .card-header {
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .momentum-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-info {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    .badge-success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+    }
+
+    .badge-error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .momentum-display {
+      margin-bottom: 20px;
+    }
+
+    .momentum-number {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #3b82f6, #22c55e, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+    }
+
+    .momentum-label {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .momentum-meter {
+      margin-bottom: 12px;
+    }
+
+    .momentum-bar {
+      height: 20px;
+      background: linear-gradient(90deg,
+        #3b82f6 0%,
+        #22c55e 33%,
+        #f59e0b 66%,
+        #ef4444 100%
+      );
+      border-radius: 10px;
+      position: relative;
+      overflow: visible;
+    }
+
+    .momentum-indicator {
+      width: 6px;
+      height: 28px;
+      background: #ffffff;
+      border-radius: 3px;
+      position: absolute;
+      top: -4px;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .momentum-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Animated glow effect based on momentum */
+    .momentum-widget[data-heat="cold"] {
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .momentum-widget[data-heat="warm"] {
+      border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    }
+
+    .momentum-widget[data-heat="hot"] {
+      border-color: rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .momentum-widget[data-heat="fire"] {
+      border-color: rgba(239, 68, 68, 0.3);
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+      animation: fire-glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes fire-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+      }
+    }
+  </style>
+</head>
+<body class="overlay-mode">
+  <div class="overlay-container overlay-position-top-right">
+    <div id="momentum-widget" class="momentum-widget" data-heat="warm" role="region" aria-label="Room Momentum Meter">
+      <div class="card-header">
+        <h3 class="card-title">Room Momentum</h3>
+        <span class="momentum-status badge badge-success" role="status">Warming Up</span>
+      </div>
+
+      <div class="momentum-display">
+        <span class="momentum-number" aria-live="polite">50</span>
+        <span class="momentum-label">/ 100</span>
+      </div>
+
+      <div class="momentum-meter" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+        <div class="momentum-bar">
+          <div class="momentum-indicator" style="left: 50%"></div>
+        </div>
+        <div class="momentum-labels" aria-hidden="true">
+          <span>Cold</span>
+          <span>Neutral</span>
+          <span>Hot</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../src/utils/api-client.js"></script>
+  <script src="../src/components/widgets.js"></script>
+  <script>
+    // Configuration from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const config = {
+      roomId: params.get('room') || null,
+      position: params.get('position') || 'top-right',
+      theme: params.get('theme') || 'dark-glass',
+      scale: parseFloat(params.get('scale') || '1'),
+      chromakey: params.get('chromakey') || null,
+      refreshInterval: parseInt(params.get('refresh') || '60000', 10),
+      demo: params.get('demo') === 'true',
+    };
+
+    // Apply configuration
+    document.documentElement.setAttribute('data-scale', config.scale);
+    if (config.chromakey) {
+      document.documentElement.setAttribute('data-chromakey', config.chromakey);
+    }
+
+    // Set position
+    const container = document.querySelector('.overlay-container');
+    container.classList.remove('overlay-position-top-right');
+    container.classList.add(`overlay-position-${config.position}`);
+
+    // Apply theme
+    if (config.theme) {
+      document.body.classList.add(`theme-${config.theme}`);
+    }
+
+    // Widget elements
+    const widget = document.getElementById('momentum-widget');
+    const numberEl = widget.querySelector('.momentum-number');
+    const indicatorEl = widget.querySelector('.momentum-indicator');
+    const statusEl = widget.querySelector('.momentum-status');
+    const meterEl = widget.querySelector('[role="progressbar"]');
+
+    // Update momentum display
+    function updateMomentum(value) {
+      const clampedValue = Math.max(0, Math.min(100, value));
+
+      // Update number with animation
+      animateNumber(numberEl, parseInt(numberEl.textContent) || 0, clampedValue);
+
+      // Update indicator position
+      indicatorEl.style.left = `${clampedValue}%`;
+
+      // Update ARIA
+      meterEl.setAttribute('aria-valuenow', clampedValue);
+
+      // Update status badge and heat
+      const { label, type, heat } = getMomentumStatus(clampedValue);
+      statusEl.textContent = label;
+      statusEl.className = `momentum-status badge badge-${type}`;
+      widget.setAttribute('data-heat', heat);
+    }
+
+    function getMomentumStatus(value) {
+      if (value < 25) return { label: 'Cold', type: 'info', heat: 'cold' };
+      if (value < 50) return { label: 'Warming Up', type: 'success', heat: 'warm' };
+      if (value < 75) return { label: 'Hot', type: 'warning', heat: 'hot' };
+      return { label: 'On Fire!', type: 'error', heat: 'fire' };
+    }
+
+    function animateNumber(element, from, to, duration = 500) {
+      const startTime = performance.now();
+      const diff = to - from;
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = from + (diff * easeOut);
+
+        element.textContent = Math.round(current);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }
+
+    // Demo mode - simulate momentum changes
+    if (config.demo || !config.roomId) {
+      let currentMomentum = 50;
+
+      setInterval(() => {
+        // Random walk with bounds
+        const change = (Math.random() - 0.5) * 20;
+        currentMomentum = Math.max(0, Math.min(100, currentMomentum + change));
+        updateMomentum(currentMomentum);
+      }, 3000);
+    } else if (config.roomId) {
+      // Real API mode
+      async function fetchMomentum() {
+        try {
+          const [roomData, recentBets] = await Promise.all([
+            MyPrizeAPI.rooms.get(config.roomId),
+            MyPrizeAPI.bets.getRecent({ room_id: config.roomId, page_size: 50 }),
+          ]);
+
+          const bets = Array.isArray(recentBets) ? recentBets : recentBets.data || [];
+          const momentum = calculateMomentum(bets, roomData);
+          updateMomentum(momentum);
+        } catch (error) {
+          console.error('[Momentum] Fetch error:', error);
+        }
+      }
+
+      function calculateMomentum(bets, roomData) {
+        const now = Date.now();
+        const fiveMinutesAgo = now - 5 * 60 * 1000;
+
+        const recentActivity = bets.filter(bet => {
+          const betTime = new Date(bet.created_at || bet.timestamp).getTime();
+          return betTime > fiveMinutesAgo;
+        });
+
+        const activityScore = Math.min(recentActivity.length * 2, 40);
+        const bigWins = bets.filter(bet => (bet.multiplier || 0) > 10);
+        const bigWinScore = Math.min(bigWins.length * 10, 30);
+        const viewerScore = Math.min((roomData.viewers || 0) / 10, 30);
+
+        return Math.min(activityScore + bigWinScore + viewerScore, 100);
+      }
+
+      // Initial fetch
+      fetchMomentum();
+
+      // Periodic refresh
+      setInterval(fetchMomentum, config.refreshInterval);
+    }
+
+    console.log('[Overlay] Momentum widget initialized with config:', config);
+  </script>
+</body>
+</html>
