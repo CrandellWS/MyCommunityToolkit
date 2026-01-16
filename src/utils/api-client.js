@@ -158,7 +158,8 @@ const MyPrizeAPI = (() => {
    * @returns {string} Full URL
    */
   function buildUrl(endpoint, params) {
-    const url = new URL(endpoint.startsWith('/') ? endpoint : `/${endpoint}`, config.baseUrl);
+    const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = new URL(config.baseUrl + path);
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
