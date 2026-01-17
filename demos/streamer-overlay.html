@@ -305,7 +305,9 @@
     // Configuration from URL parameters
     const params = new URLSearchParams(window.location.search);
     const config = {
-      roomId: params.get('room') || null,
+      roomSlug: params.get('room') || null,
+      roomId: null, // Will be resolved from slug
+      roomData: null, // Full room data
       showStats: params.get('stats') !== 'false',
       showMomentum: params.get('momentum') !== 'false',
       showWins: params.get('wins') !== 'false',
@@ -330,6 +332,26 @@
     alertBanner.querySelector('.alert-close').addEventListener('click', () => {
       alertBanner.classList.add('hidden');
     });
+
+    // Resolve room slug to ID
+    async function resolveRoom() {
+      if (!config.roomSlug) {
+        console.log('[Overlay] No room slug provided');
+        return false;
+      }
+
+      try {
+        console.log('[Overlay] Looking up room:', config.roomSlug);
+        const room = await MyPrizeAPI.rooms.getBySlug(config.roomSlug);
+        config.roomId = room.id;
+        config.roomData = room;
+        console.log('[Overlay] Room resolved:', room.name, 'ID:', room.id);
+        return true;
+      } catch (error) {
+        console.error('[Overlay] Failed to resolve room:', error);
+        return false;
+      }
+    }
 
     // Animate number change
     function animateNumber(element, from, to, duration = 500) {
@@ -366,7 +388,22 @@
         if (config.demo) {
           animateNumber(viewersEl, parseInt(viewersEl.textContent) || 0, Math.floor(Math.random() * 500) + 100);
           animateNumber(winsEl, parseInt(winsEl.textContent) || 0, Math.floor(Math.random() * 200) + 50);
+        } else if (config.roomId) {
+          // Fetch room data for viewer count
+          const room = await MyPrizeAPI.rooms.get(config.roomId);
+          config.roomData = room;
+          animateNumber(viewersEl, parseInt(viewersEl.textContent) || 0, room.current_user_count || 0);
+
+          // Fetch room's big wins count
+          const winsData = await MyPrizeAPI.bets.getBig({
+            page_size: 100,
+            equals_field: 'room_id',
+            equals_value: config.roomId
+          });
+          const wins = Array.isArray(winsData) ? winsData : winsData.data || [];
+          animateNumber(winsEl, parseInt(winsEl.textContent) || 0, wins.length);
         } else {
+          // Platform-wide stats
           const data = await MyPrizeAPI.users.getStats();
           animateNumber(viewersEl, parseInt(viewersEl.textContent) || 0, data.activeUserCount || 0);
 
@@ -381,10 +418,43 @@
 
     // Update momentum
     let currentMomentum = 50;
-    function updateMomentum() {
+    async function updateMomentum() {
       if (config.demo) {
-        // Random walk
+        // Random walk for demo
         currentMomentum = Math.max(0, Math.min(100, currentMomentum + (Math.random() - 0.5) * 20));
+      } else if (config.roomId) {
+        // Calculate momentum from room activity
+        try {
+          const [roomData, betsData] = await Promise.all([
+            MyPrizeAPI.rooms.get(config.roomId),
+            MyPrizeAPI.bets.getRecent({
+              page_size: 20,
+              equals_field: 'room_id',
+              equals_value: config.roomId
+            })
+          ]);
+
+          const viewers = roomData.current_user_count || 0;
+          const bets = Array.isArray(betsData) ? betsData : betsData.data || [];
+          const recentBetCount = bets.length;
+          const isLive = roomData.stream_status === 'online';
+
+          // Calculate momentum based on activity
+          let momentum = 50; // Base
+
+          // Viewer contribution (up to 25 points)
+          momentum += Math.min(25, viewers / 4);
+
+          // Recent bets contribution (up to 20 points)
+          momentum += Math.min(20, recentBetCount);
+
+          // Live bonus (5 points)
+          if (isLive) momentum += 5;
+
+          currentMomentum = Math.max(0, Math.min(100, momentum));
+        } catch (error) {
+          console.error('[Momentum] Error:', error);
+        }
       }
 
       animateNumber(momentumValueEl, parseInt(momentumValueEl.textContent) || 0, Math.round(currentMomentum));
@@ -404,10 +474,12 @@
             { bet_id: '3', username: 'SlotKing', igame: { name: 'Starlight Princess' }, amount_won: 12680, multiplier: 67.3 },
           ];
         } else {
-          const response = await MyPrizeAPI.bets.getBig({
-            page_size: 5,
-            room_id: config.roomId,
-          });
+          const params = { page_size: 5 };
+          if (config.roomId) {
+            params.equals_field = 'room_id';
+            params.equals_value = config.roomId;
+          }
+          const response = await MyPrizeAPI.bets.getBig(params);
           wins = Array.isArray(response) ? response : response.data || [];
         }
 
@@ -451,17 +523,33 @@
       }
     }
 
-    // Initial updates
-    updateStats();
-    updateMomentum();
-    updateWins();
+    // Initialize overlay
+    async function init() {
+      console.log('[Overlay] Initializing with slug:', config.roomSlug);
 
-    // Periodic updates
-    setInterval(updateStats, config.refreshInterval);
-    setInterval(updateMomentum, 3000);
-    setInterval(updateWins, config.refreshInterval);
+      // Resolve room slug to ID if provided
+      if (config.roomSlug && !config.demo) {
+        const resolved = await resolveRoom();
+        if (!resolved) {
+          console.warn('[Overlay] Could not resolve room, showing platform-wide data');
+        }
+      }
 
-    console.log('[Overlay] Streamer overlay initialized with config:', config);
+      // Initial updates
+      updateStats();
+      updateMomentum();
+      updateWins();
+
+      // Periodic updates
+      setInterval(updateStats, config.refreshInterval);
+      setInterval(updateMomentum, 5000);
+      setInterval(updateWins, config.refreshInterval);
+
+      console.log('[Overlay] Streamer overlay initialized with config:', config);
+    }
+
+    // Start
+    init();
   </script>
 </body>
 </html>
