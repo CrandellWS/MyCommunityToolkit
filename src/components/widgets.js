@@ -484,7 +484,8 @@ const Widgets = (() => {
       // - Average bet size
       // - Big win frequency
 
-      const bets = recentBets.data || recentBets.bets || [];
+      // API returns array directly for bets
+      const bets = Array.isArray(recentBets) ? recentBets : (recentBets.data || recentBets.results || []);
       const now = Date.now();
       const fiveMinutesAgo = now - 5 * 60 * 1000;
 
@@ -500,8 +501,9 @@ const Widgets = (() => {
       const bigWins = bets.filter(bet => (bet.multiplier || 0) > 10);
       const bigWinScore = Math.min(bigWins.length * 10, 30);
 
-      // Room viewer bonus (if available)
-      const viewerScore = Math.min((roomData.viewers || 0) / 10, 30);
+      // Room viewer bonus (current_user_count from API)
+      const viewerCount = roomData.current_user_count || 0;
+      const viewerScore = Math.min(viewerCount * 3, 30);
 
       // Calculate total momentum (0-100)
       const totalMomentum = Math.min(activityScore + bigWinScore + viewerScore, 100);

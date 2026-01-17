@@ -1387,7 +1387,57 @@
         refreshInterval: 60000,
       });
 
+      // Update stat widgets with room data
+      updateRoomStats(roomId);
+
       console.log('[Dashboard] Widgets reinitialized for room:', roomId);
+    }
+
+    async function updateRoomStats(roomId) {
+      try {
+        // Fetch room data for stats
+        const roomData = await MyPrizeAPI.rooms.get(roomId);
+
+        // Update Active Viewers stat
+        const viewersStat = document.querySelector('#stat-viewers .stat-card-value');
+        if (viewersStat) {
+          const oldValue = parseInt(viewersStat.textContent.replace(/,/g, '')) || 0;
+          viewersStat.textContent = (roomData.current_user_count || 0).toLocaleString();
+
+          // Update change indicator
+          const change = (roomData.current_user_count || 0) - oldValue;
+          const changeEl = document.querySelector('#stat-viewers .stat-card-change');
+          if (changeEl) {
+            if (change > 0) {
+              changeEl.innerHTML = `<span class="change-up">+${change}</span>`;
+            } else if (change < 0) {
+              changeEl.innerHTML = `<span class="change-down">${change}</span>`;
+            } else {
+              changeEl.innerHTML = '';
+            }
+          }
+        }
+
+        // Fetch room's big wins for stats
+        const bigWins = await MyPrizeAPI.bets.getBig({ room_id: roomId, page_size: 100 });
+        const winsArray = Array.isArray(bigWins) ? bigWins : [];
+
+        // Update Big Wins stat
+        const winsStat = document.querySelector('#stat-wins .stat-card-value');
+        if (winsStat) {
+          winsStat.textContent = winsArray.length.toLocaleString();
+        }
+
+        // Update title to show it's room-specific
+        const viewersTitle = document.querySelector('#stat-viewers .stat-card-title');
+        if (viewersTitle) viewersTitle.textContent = 'Room Viewers';
+
+        const winsTitle = document.querySelector('#stat-wins .stat-card-title');
+        if (winsTitle) winsTitle.textContent = 'Room Big Wins';
+
+      } catch (error) {
+        console.error('[Dashboard] Failed to update room stats:', error);
+      }
     }
   </script>
 </body>
