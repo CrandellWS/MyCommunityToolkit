@@ -1436,6 +1436,10 @@
   color: var(--color-neutral-400);
 }
 
+.room-change-btn {
+  padding: var(--space-2) var(--space-3);
+}
+
 .room-clear-btn {
   color: var(--color-neutral-500);
 }

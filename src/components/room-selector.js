@@ -109,6 +109,9 @@ const RoomSelector = (() => {
             </span>
             <span class="room-stream-status"></span>
           </div>
+          <button class="btn btn-secondary btn-sm room-change-btn" title="Change room">
+            Change
+          </button>
           <button class="btn btn-ghost btn-sm room-clear-btn" title="Clear selection">
             &#10005;
           </button>
@@ -152,6 +155,11 @@ const RoomSelector = (() => {
 
     clearBtn.addEventListener('click', () => {
       clearRoom(container);
+    });
+
+    const changeBtn = container.querySelector('.room-change-btn');
+    changeBtn.addEventListener('click', () => {
+      showChangeMode(container);
     });
 
     // Click outside to close suggestions
@@ -311,6 +319,26 @@ const RoomSelector = (() => {
   }
 
   /**
+   * Show change mode - display input while keeping current room
+   */
+  function showChangeMode(container) {
+    if (!container) return;
+
+    const inputWrapper = container.querySelector('.room-selector-body');
+    const selectedEl = container.querySelector('.room-selected');
+    const input = container.querySelector('.room-input');
+
+    // Show both input and current selection
+    if (inputWrapper) inputWrapper.style.display = 'block';
+    if (selectedEl) selectedEl.style.opacity = '0.5';
+    if (input) {
+      input.value = '';
+      input.focus();
+      input.placeholder = 'Enter new room slug...';
+    }
+  }
+
+  /**
    * Clear the selected room
    */
   function clearRoom(container) {
@@ -337,6 +365,7 @@ const RoomSelector = (() => {
       if (inputWrapper) inputWrapper.style.display = 'none';
       if (selectedEl) {
         selectedEl.style.display = 'flex';
+        selectedEl.style.opacity = '1';
 
         const avatar = selectedEl.querySelector('.room-avatar');
         const name = selectedEl.querySelector('.room-name');
