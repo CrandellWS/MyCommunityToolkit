@@ -1239,6 +1239,7 @@
       }
 
       // Initialize room selector
+      console.log('[Dashboard] RoomSelector available:', typeof RoomSelector !== 'undefined');
       if (typeof RoomSelector !== 'undefined') {
         RoomSelector.init('#room-selector-container', {
           placeholder: 'Enter room slug (e.g., gwaslots)',
@@ -1248,7 +1249,9 @@
 
         // Subscribe to room changes to update widgets
         RoomSelector.subscribe((room) => {
+          console.log('[Dashboard] Room subscription callback fired:', room);
           if (room) {
+            console.log('[Dashboard] Room ID:', room.id, 'Room name:', room.name);
             Toast.success(`Connected to ${room.name}`);
             // Reinitialize widgets with the new room ID
             reinitializeWidgetsWithRoom(room.id);
@@ -1256,6 +1259,7 @@
             Toast.info('Room disconnected');
           }
         });
+        console.log('[Dashboard] RoomSelector initialized and subscribed');
       }
 
       // Scroll reveal animation
@@ -1436,10 +1440,13 @@
       });
 
       // Recreate Game Carousel with room's recent games
+      console.log('[Dashboard] Checking GameCarousel:', typeof GameCarousel);
       if (typeof GameCarousel !== 'undefined') {
         const carouselContainer = document.querySelector('#widget-game-carousel');
+        console.log('[Dashboard] Carousel container:', carouselContainer);
         if (carouselContainer) {
           carouselContainer.innerHTML = '';
+          console.log('[Dashboard] Creating GameCarousel with roomId:', roomId);
           GameCarousel.create('#widget-game-carousel', {
             title: 'Recent Games',
             roomId: roomId,
