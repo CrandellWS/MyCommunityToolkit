@@ -142,12 +142,18 @@ const ThemeConfig = (() => {
     }
     applyTheme(effectiveTheme);
 
-    // Apply custom colors
-    if (currentConfig.primaryColor) {
-      applyColor('primary', currentConfig.primaryColor);
-    }
-    if (currentConfig.accentColor) {
-      applyColor('accent', currentConfig.accentColor);
+    // Apply custom colors (but not for themed modes which define their own colors)
+    const themedModes = ['neon', 'sunset', 'forest'];
+    if (!themedModes.includes(effectiveTheme)) {
+      if (currentConfig.primaryColor) {
+        applyColor('primary', currentConfig.primaryColor);
+      }
+      if (currentConfig.accentColor) {
+        applyColor('accent', currentConfig.accentColor);
+      }
+    } else {
+      // Clear any previously applied custom colors for themed modes
+      clearCustomColors();
     }
 
     // Apply border radius
@@ -208,6 +214,22 @@ const ThemeConfig = (() => {
     // Apply glow color
     const glowColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`;
     root.style.setProperty(`--color-glow-${type}`, glowColor);
+  }
+
+  /**
+   * Clear custom color overrides (for themed modes)
+   */
+  function clearCustomColors() {
+    const root = document.documentElement;
+    const shades = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+    const types = ['primary', 'accent'];
+
+    types.forEach(type => {
+      shades.forEach(shade => {
+        root.style.removeProperty(`--color-${type}-${shade}`);
+      });
+      root.style.removeProperty(`--color-glow-${type}`);
+    });
   }
 
   /**
