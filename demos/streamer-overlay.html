@@ -217,6 +217,95 @@
       }
     }
 
+    /* Active players scrolling list */
+    .players-scroll-container {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
+      width: 200px;
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .players-scroll-header {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .players-scroll-track {
+      height: 140px;
+      overflow: hidden;
+      position: relative;
+      mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        white 20%,
+        white 80%,
+        transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        white 20%,
+        white 80%,
+        transparent 100%);
+    }
+
+    .players-scroll-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @keyframes scroll-up {
+      0% {
+        transform: translateY(20px);
+      }
+      100% {
+        transform: translateY(calc(-100% + 140px));
+      }
+    }
+
+    .player-item {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-item.highlight {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(34, 197, 94, 0.4));
+      color: #ffffff;
+      font-weight: 600;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .players-scroll-center-zone {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 36px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      border-top: 1px solid rgba(59, 130, 246, 0.3);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
     /* Hide based on visibility settings */
     .hide-widget {
       display: none !important;
@@ -342,6 +431,19 @@
       </div>
     </div>
 
+    <!-- Bottom Left: Active Players -->
+    <div class="overlay-bottom-left">
+      <div class="players-scroll-container" id="players-widget">
+        <div class="players-scroll-header">Active Players</div>
+        <div class="players-scroll-track">
+          <div class="players-scroll-list" id="players-list">
+            <!-- Players populated by JS -->
+          </div>
+          <div class="players-scroll-center-zone"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Right: Recent Games -->
     <div class="overlay-bottom-right">
       <div class="recent-games-compact" id="games-widget">
@@ -372,6 +474,7 @@
       showStats: params.get('stats') !== 'false',
       showMomentum: params.get('momentum') !== 'false',
       showGames: params.get('games') !== 'false',
+      showPlayers: params.get('players') !== 'false',
       refreshInterval: parseInt(params.get('refresh') || '30000', 10),
       gamesRefreshInterval: 30000, // Games update every 30 seconds
       demo: params.get('demo') === 'true',
@@ -384,6 +487,7 @@
     if (!config.showStats) document.getElementById('stats-row').classList.add('hide-widget');
     if (!config.showMomentum) document.getElementById('momentum-widget').classList.add('hide-widget');
     if (!config.showGames) document.getElementById('games-widget').classList.add('hide-widget');
+    if (!config.showPlayers) document.getElementById('players-widget').classList.add('hide-widget');
 
     // Element references
     const viewersEl = document.getElementById('viewers-value');
@@ -391,6 +495,7 @@
     const momentumValueEl = document.getElementById('momentum-value');
     const momentumIndicatorEl = document.getElementById('momentum-indicator');
     const gamesListEl = document.getElementById('games-list');
+    const playersListEl = document.getElementById('players-list');
     const alertBanner = document.getElementById('alert-banner');
     const roomAvatarEl = document.getElementById('room-avatar');
 
@@ -594,7 +699,135 @@
       `).join('');
     }
 
-    // Update big wins
+    // Active players scrolling list
+    let currentPlayers = [];
+    let playersDisplayTimer = null;
+    const playersContainer = document.getElementById('players-widget');
+
+    // Fetch player data frequently (every 30 seconds)
+    async function fetchPlayers() {
+      if (!config.roomId && !config.demo) {
+        return;
+      }
+
+      try {
+        if (config.demo) {
+          currentPlayers = ['LuckyPlayer', 'WinMaster', 'SlotKing', 'GambleQueen', 'JackpotJoe', 'SpinDoctor', 'BetBoss', 'CasinoKid'];
+          return;
+        }
+
+        // Fetch bet round metrics
+        const metrics = await MyPrizeAPI.rooms.getBetRoundMetrics(config.roomId);
+        const activeRound = metrics.active_round || metrics.last_round;
+
+        if (!activeRound || !activeRound.bet_round_user_ids) {
+          console.log('[Players] No active round data');
+          return;
+        }
+
+        const userIds = activeRound.bet_round_user_ids.slice(0, 30); // Limit to 30 users
+        console.log(`[Players] Fetching ${userIds.length} usernames...`);
+
+        // Fetch usernames in parallel (batch of 10 at a time to avoid rate limits)
+        const usernames = [];
+        for (let i = 0; i < userIds.length; i += 10) {
+          const batch = userIds.slice(i, i + 10);
+          const results = await Promise.all(
+            batch.map(async (id) => {
+              try {
+                const user = await MyPrizeAPI.users.get(id);
+                return user.username;
+              } catch (e) {
+                return null;
+              }
+            })
+          );
+          usernames.push(...results.filter(Boolean));
+        }
+
+        console.log(`[Players] Got ${usernames.length} usernames`);
+        currentPlayers = usernames;
+
+      } catch (error) {
+        console.error('[Players] Error:', error);
+      }
+    }
+
+    // Show players list, scroll through once, then hide
+    function showPlayersOnce() {
+      if (currentPlayers.length === 0) {
+        scheduleNextDisplay();
+        return;
+      }
+
+      console.log('[Players] Displaying player list...');
+      playersContainer.style.display = 'block';
+      playersContainer.style.opacity = '0';
+      playersContainer.style.transition = 'opacity 0.5s ease';
+
+      // Render the list (single pass, no duplicate)
+      const scrollDuration = currentPlayers.length * 1.5; // 1.5 seconds per player
+      playersListEl.style.setProperty('--scroll-duration', `${scrollDuration}s`);
+      playersListEl.style.animation = 'none'; // Reset animation
+
+      playersListEl.innerHTML = currentPlayers.map((name, i) => `
+        <div class="player-item" data-index="${i}">${name}</div>
+      `).join('');
+
+      // Fade in
+      requestAnimationFrame(() => {
+        playersContainer.style.opacity = '1';
+        // Start scroll animation
+        requestAnimationFrame(() => {
+          playersListEl.style.animation = `scroll-up ${scrollDuration}s linear forwards`;
+        });
+      });
+
+      // Start highlight animation
+      startHighlightAnimation(currentPlayers.length);
+
+      // Hide after scroll completes
+      setTimeout(() => {
+        playersContainer.style.opacity = '0';
+        setTimeout(() => {
+          playersContainer.style.display = 'none';
+          if (highlightInterval) clearInterval(highlightInterval);
+          scheduleNextDisplay();
+        }, 500);
+      }, scrollDuration * 1000);
+    }
+
+    function scheduleNextDisplay() {
+      if (playersDisplayTimer) clearTimeout(playersDisplayTimer);
+      // Random interval between 1-3 minutes
+      const interval = (1 + Math.random() * 2) * 60 * 1000;
+      console.log(`[Players] Next display in ${(interval / 1000 / 60).toFixed(1)} minutes`);
+      playersDisplayTimer = setTimeout(showPlayersOnce, interval);
+    }
+
+    let highlightInterval = null;
+    function startHighlightAnimation(playerCount) {
+      if (highlightInterval) clearInterval(highlightInterval);
+
+      const items = playersListEl.querySelectorAll('.player-item');
+      let currentIndex = 0;
+      const intervalTime = 1500; // 1.5 seconds per player (matches scroll speed)
+
+      function updateHighlight() {
+        items.forEach((item, i) => {
+          if (i === currentIndex) {
+            item.classList.add('highlight');
+          } else {
+            item.classList.remove('highlight');
+          }
+        });
+        currentIndex = (currentIndex + 1) % playerCount;
+      }
+
+      updateHighlight();
+      highlightInterval = setInterval(updateHighlight, intervalTime);
+    }
+
     // Initialize overlay
     async function init() {
       console.log('[Overlay] Initializing with slug:', config.roomSlug);
@@ -612,9 +845,15 @@
       updateGames(); // This also updates roomData for momentum
       updateMomentum();
 
+      // Players: fetch data often, but only display every 1-3 minutes
+      playersContainer.style.display = 'none'; // Hidden initially
+      fetchPlayers(); // Initial fetch
+      setInterval(fetchPlayers, 30000); // Fetch every 30 seconds
+      scheduleNextDisplay(); // Schedule first display in 1-3 minutes
+
       // Periodic updates
       setInterval(updateStats, config.refreshInterval);
-      setInterval(updateGames, config.gamesRefreshInterval); // Games update every minute
+      setInterval(updateGames, config.gamesRefreshInterval); // Games update every 30 seconds
       setInterval(updateMomentum, 10000); // Momentum every 10 seconds
 
       console.log('[Overlay] Streamer overlay initialized with config:', config);
