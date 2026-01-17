@@ -3,6 +3,7 @@
  * Horizontal scrolling game showcase with smooth animations
  * @module GameCarousel
  */
+console.log('[GameCarousel] Module loading...');
 
 const GameCarousel = (() => {
   'use strict';

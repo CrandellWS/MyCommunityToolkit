@@ -2,6 +2,7 @@
  * MyPrize Streamer Toolkit - Room Selector Component
  * Allows users to search and select a room by slug
  */
+console.log('[RoomSelector] Module loading...');
 
 const RoomSelector = (() => {
   'use strict';

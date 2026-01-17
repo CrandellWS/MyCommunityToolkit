@@ -1166,8 +1166,11 @@
   <script src="src/components/room-selector.js"></script>
 
   <script>
+    console.log('[Dashboard] Script starting...');
+
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('[Dashboard] DOMContentLoaded fired');
       // Initialize theme
       if (typeof ThemeConfig !== 'undefined') {
         ThemeConfig.init();
