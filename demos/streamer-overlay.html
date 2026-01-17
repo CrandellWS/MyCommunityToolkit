@@ -243,6 +243,86 @@
     .hide-widget {
       display: none !important;
     }
+
+    /* Recent games widget */
+    .recent-games-compact {
+      max-width: 280px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .recent-games-compact .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .recent-games-compact .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recent-games-compact .card-body {
+      padding: 12px 16px;
+    }
+
+    .game-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+
+    .game-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .game-item.now-playing {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .game-item-icon {
+      font-size: 1.5rem;
+    }
+
+    .game-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .game-item-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-item-provider {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: capitalize;
+    }
+
+    .game-item-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      background: #22c55e;
+      color: #000;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 <body class="overlay-mode">
@@ -281,6 +361,23 @@
       </div>
     </div>
 
+    <!-- Bottom Left: Recent Games -->
+    <div class="overlay-bottom-left">
+      <div class="recent-games-compact" id="games-widget">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span aria-hidden="true">&#127918;</span>
+            Recent Games
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="games-list" id="games-list">
+            <!-- Games populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Right: Big Wins Feed -->
     <div class="overlay-bottom-right">
       <div class="big-wins-compact" id="big-wins-widget">
@@ -311,14 +408,20 @@
       showStats: params.get('stats') !== 'false',
       showMomentum: params.get('momentum') !== 'false',
       showWins: params.get('wins') !== 'false',
+      showGames: params.get('games') !== 'false',
       refreshInterval: parseInt(params.get('refresh') || '30000', 10),
+      gamesRefreshInterval: 60000, // Games update every minute
       demo: params.get('demo') === 'true',
     };
+
+    // Track recent games history
+    let recentGamesHistory = [];
 
     // Apply visibility settings
     if (!config.showStats) document.getElementById('stats-row').classList.add('hide-widget');
     if (!config.showMomentum) document.getElementById('momentum-widget').classList.add('hide-widget');
     if (!config.showWins) document.getElementById('big-wins-widget').classList.add('hide-widget');
+    if (!config.showGames) document.getElementById('games-widget').classList.add('hide-widget');
 
     // Stats values
     const viewersEl = document.getElementById('viewers-value');
@@ -326,6 +429,7 @@
     const momentumValueEl = document.getElementById('momentum-value');
     const momentumIndicatorEl = document.getElementById('momentum-indicator');
     const winsListEl = document.getElementById('wins-list');
+    const gamesListEl = document.getElementById('games-list');
     const alertBanner = document.getElementById('alert-banner');
 
     // Alert close handler
@@ -416,49 +520,119 @@
       }
     }
 
-    // Update momentum
+    // Update momentum - simple calculation based on room activity
     let currentMomentum = 50;
     async function updateMomentum() {
       if (config.demo) {
         // Random walk for demo
         currentMomentum = Math.max(0, Math.min(100, currentMomentum + (Math.random() - 0.5) * 20));
-      } else if (config.roomId) {
-        // Calculate momentum from room activity
-        try {
-          const [roomData, betsData] = await Promise.all([
-            MyPrizeAPI.rooms.get(config.roomId),
-            MyPrizeAPI.bets.getRecent({
-              page_size: 20,
-              equals_field: 'room_id',
-              equals_value: config.roomId
-            })
-          ]);
+      } else if (config.roomData) {
+        // Use cached room data for momentum calculation
+        const viewers = config.roomData.current_user_count || 0;
+        const isLive = config.roomData.stream_status === 'online';
+        const followers = config.roomData.follower_count || 0;
 
-          const viewers = roomData.current_user_count || 0;
-          const bets = Array.isArray(betsData) ? betsData : betsData.data || [];
-          const recentBetCount = bets.length;
-          const isLive = roomData.stream_status === 'online';
+        // Simple momentum: base 30, plus viewer ratio, plus live bonus
+        let momentum = 30;
 
-          // Calculate momentum based on activity
-          let momentum = 50; // Base
+        // Viewer contribution (scale based on typical room size, up to 40 points)
+        momentum += Math.min(40, (viewers / 50) * 40);
 
-          // Viewer contribution (up to 25 points)
-          momentum += Math.min(25, viewers / 4);
+        // Live bonus (20 points)
+        if (isLive) momentum += 20;
 
-          // Recent bets contribution (up to 20 points)
-          momentum += Math.min(20, recentBetCount);
-
-          // Live bonus (5 points)
-          if (isLive) momentum += 5;
-
-          currentMomentum = Math.max(0, Math.min(100, momentum));
-        } catch (error) {
-          console.error('[Momentum] Error:', error);
+        // Follower bonus (up to 10 points based on engagement)
+        if (followers > 0 && viewers > 0) {
+          const engagement = Math.min(1, viewers / (followers * 0.1));
+          momentum += engagement * 10;
         }
+
+        currentMomentum = Math.max(0, Math.min(100, momentum));
       }
 
       animateNumber(momentumValueEl, parseInt(momentumValueEl.textContent) || 0, Math.round(currentMomentum));
       momentumIndicatorEl.style.left = `${currentMomentum}%`;
+    }
+
+    // Update recent games - shows current game + 2 recent games
+    async function updateGames() {
+      if (!config.roomId && !config.demo) {
+        gamesListEl.innerHTML = '<div style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">Select a room to see games</div>';
+        return;
+      }
+
+      try {
+        if (config.demo) {
+          renderGames([
+            { name: 'Sweet Bonanza', provider: 'pragmatic', isCurrentlyPlaying: true },
+            { name: 'Gates of Olympus', provider: 'pragmatic', isCurrentlyPlaying: false },
+            { name: 'Sugar Rush', provider: 'pragmatic', isCurrentlyPlaying: false },
+          ]);
+          return;
+        }
+
+        // Get room data for current game
+        const roomData = await MyPrizeAPI.rooms.get(config.roomId);
+        config.roomData = roomData;
+
+        const currentGameId = roomData.last_igame_played_id;
+        const currentGameName = roomData.last_igame_played_name;
+        const currentGameProvider = roomData.last_igame_played_provider;
+
+        // Build games list with current game first
+        const games = [];
+
+        if (currentGameId && currentGameName) {
+          games.push({
+            id: currentGameId,
+            name: currentGameName,
+            provider: currentGameProvider || 'Unknown',
+            isCurrentlyPlaying: true
+          });
+
+          // Add to history if not already there
+          if (!recentGamesHistory.find(g => g.id === currentGameId)) {
+            recentGamesHistory.unshift({
+              id: currentGameId,
+              name: currentGameName,
+              provider: currentGameProvider || 'Unknown'
+            });
+            // Keep only last 10 in history
+            recentGamesHistory = recentGamesHistory.slice(0, 10);
+          }
+        }
+
+        // Add recent games from history (excluding current)
+        for (const game of recentGamesHistory) {
+          if (games.length >= 3) break;
+          if (game.id !== currentGameId) {
+            games.push({ ...game, isCurrentlyPlaying: false });
+          }
+        }
+
+        renderGames(games);
+      } catch (error) {
+        console.error('[Games] Error:', error);
+        gamesListEl.innerHTML = '<div style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">Unable to load games</div>';
+      }
+    }
+
+    function renderGames(games) {
+      if (games.length === 0) {
+        gamesListEl.innerHTML = '<div style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">No games played yet</div>';
+        return;
+      }
+
+      gamesListEl.innerHTML = games.slice(0, 3).map((game, i) => `
+        <div class="game-item ${game.isCurrentlyPlaying ? 'now-playing' : ''}" style="animation-delay: ${i * 50}ms">
+          <span class="game-item-icon" aria-hidden="true">&#127918;</span>
+          <div class="game-item-info">
+            <div class="game-item-name">${game.name}</div>
+            <div class="game-item-provider">${game.provider}</div>
+          </div>
+          ${game.isCurrentlyPlaying ? '<span class="game-item-badge">LIVE</span>' : ''}
+        </div>
+      `).join('');
     }
 
     // Update big wins
@@ -537,12 +711,14 @@
 
       // Initial updates
       updateStats();
+      updateGames(); // This also updates roomData for momentum
       updateMomentum();
       updateWins();
 
       // Periodic updates
       setInterval(updateStats, config.refreshInterval);
-      setInterval(updateMomentum, 5000);
+      setInterval(updateGames, config.gamesRefreshInterval); // Games update every minute
+      setInterval(updateMomentum, 10000); // Momentum every 10 seconds
       setInterval(updateWins, config.refreshInterval);
 
       console.log('[Overlay] Streamer overlay initialized with config:', config);
