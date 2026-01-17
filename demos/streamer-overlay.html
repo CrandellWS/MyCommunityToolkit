@@ -89,14 +89,54 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       padding: 16px 24px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
+
+    .momentum-avatar-container {
+      perspective: 1000px;
+      width: 64px;
+      height: 64px;
+    }
+
+    .momentum-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      object-fit: cover;
+      animation: avatar-flip 8s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes avatar-flip {
+      0%, 85% {
+        transform: rotateY(0deg);
+      }
+      90% {
+        transform: rotateY(180deg);
+      }
+      95% {
+        transform: rotateY(360deg);
+      }
+      100% {
+        transform: rotateY(360deg);
+      }
+    }
+
+    /* Varied timing for multiple displays */
+    .momentum-avatar.delay-1 { animation-duration: 7s; animation-delay: 0.5s; }
+    .momentum-avatar.delay-2 { animation-duration: 9s; animation-delay: 1s; }
+    .momentum-avatar.delay-3 { animation-duration: 6s; animation-delay: 0.2s; }
 
     .momentum-mini-label {
       font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 6px;
+      margin-bottom: 2px;
     }
 
     .momentum-mini-value {
@@ -106,13 +146,15 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      line-height: 1;
     }
 
     .momentum-mini-bar {
       height: 6px;
+      width: 100%;
       background: linear-gradient(90deg, #3b82f6, #22c55e, #f59e0b, #ef4444);
       border-radius: 3px;
-      margin-top: 8px;
+      margin-top: 4px;
       position: relative;
     }
 
@@ -286,13 +328,16 @@
       </div>
     </div>
 
-    <!-- Top Right: Momentum Meter -->
+    <!-- Top Right: Momentum Meter with Avatar -->
     <div class="overlay-top-right">
       <div class="momentum-mini" id="momentum-widget">
+        <div class="momentum-avatar-container">
+          <img class="momentum-avatar" id="room-avatar" src="" alt="Room Avatar" style="display: none;">
+        </div>
         <div class="momentum-mini-label">Room Momentum</div>
-        <div class="momentum-mini-value" id="momentum-value">50</div>
+        <div class="momentum-mini-value" id="momentum-value">0</div>
         <div class="momentum-mini-bar">
-          <div class="momentum-mini-indicator" id="momentum-indicator" style="left: 50%"></div>
+          <div class="momentum-mini-indicator" id="momentum-indicator" style="left: 0%"></div>
         </div>
       </div>
     </div>
@@ -347,6 +392,7 @@
     const momentumIndicatorEl = document.getElementById('momentum-indicator');
     const gamesListEl = document.getElementById('games-list');
     const alertBanner = document.getElementById('alert-banner');
+    const roomAvatarEl = document.getElementById('room-avatar');
 
     // Alert close handler
     alertBanner.querySelector('.alert-close').addEventListener('click', () => {
@@ -366,6 +412,16 @@
         config.roomId = room.id;
         config.roomData = room;
         console.log('[Overlay] Room resolved:', room.name, 'ID:', room.id);
+
+        // Set room avatar with random animation timing
+        if (room.avatar && roomAvatarEl) {
+          roomAvatarEl.src = room.avatar;
+          roomAvatarEl.style.display = 'block';
+          // Add random delay class for varied animation timing
+          const delayClass = ['', 'delay-1', 'delay-2', 'delay-3'][Math.floor(Math.random() * 4)];
+          if (delayClass) roomAvatarEl.classList.add(delayClass);
+        }
+
         return true;
       } catch (error) {
         console.error('[Overlay] Failed to resolve room:', error);
