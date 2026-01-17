@@ -80,70 +80,6 @@
       font-weight: 700;
     }
 
-    /* Compact big wins */
-    .big-wins-compact {
-      max-width: 350px;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .big-wins-compact .card-header {
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .big-wins-compact .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .big-wins-compact .card-body {
-      padding: 12px 16px;
-    }
-
-    .big-wins-compact .win-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      margin-bottom: 6px;
-    }
-
-    .big-wins-compact .win-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .big-wins-compact .win-game-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .big-wins-compact .win-username {
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .big-wins-compact .win-amount {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #4ade80;
-    }
-
-    .big-wins-compact .win-multiplier {
-      font-size: 0.8rem;
-      color: #4ade80;
-      margin-right: 8px;
-    }
-
     /* Momentum mini */
     .momentum-mini {
       background: rgba(0, 0, 0, 0.75);
@@ -361,8 +297,8 @@
       </div>
     </div>
 
-    <!-- Bottom Left: Recent Games -->
-    <div class="overlay-bottom-left">
+    <!-- Bottom Right: Recent Games -->
+    <div class="overlay-bottom-right">
       <div class="recent-games-compact" id="games-widget">
         <div class="card-header">
           <h3 class="card-title">
@@ -373,23 +309,6 @@
         <div class="card-body">
           <div class="games-list" id="games-list">
             <!-- Games populated by JS -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Right: Big Wins Feed -->
-    <div class="overlay-bottom-right">
-      <div class="big-wins-compact" id="big-wins-widget">
-        <div class="card-header">
-          <h3 class="card-title">
-            <span class="status-dot live" aria-hidden="true" style="width:8px;height:8px;background:#22c55e;border-radius:50%;"></span>
-            Big Wins
-          </h3>
-        </div>
-        <div class="card-body">
-          <div class="wins-list" id="wins-list">
-            <!-- Wins populated by JS -->
           </div>
         </div>
       </div>
@@ -407,10 +326,9 @@
       roomData: null, // Full room data
       showStats: params.get('stats') !== 'false',
       showMomentum: params.get('momentum') !== 'false',
-      showWins: params.get('wins') !== 'false',
       showGames: params.get('games') !== 'false',
       refreshInterval: parseInt(params.get('refresh') || '30000', 10),
-      gamesRefreshInterval: 60000, // Games update every minute
+      gamesRefreshInterval: 30000, // Games update every 30 seconds
       demo: params.get('demo') === 'true',
     };
 
@@ -420,15 +338,13 @@
     // Apply visibility settings
     if (!config.showStats) document.getElementById('stats-row').classList.add('hide-widget');
     if (!config.showMomentum) document.getElementById('momentum-widget').classList.add('hide-widget');
-    if (!config.showWins) document.getElementById('big-wins-widget').classList.add('hide-widget');
     if (!config.showGames) document.getElementById('games-widget').classList.add('hide-widget');
 
-    // Stats values
+    // Element references
     const viewersEl = document.getElementById('viewers-value');
     const winsEl = document.getElementById('wins-value');
     const momentumValueEl = document.getElementById('momentum-value');
     const momentumIndicatorEl = document.getElementById('momentum-indicator');
-    const winsListEl = document.getElementById('wins-list');
     const gamesListEl = document.getElementById('games-list');
     const alertBanner = document.getElementById('alert-banner');
 
@@ -478,14 +394,6 @@
       requestAnimationFrame(animate);
     }
 
-    // Format currency
-    function formatCurrency(amount) {
-      if (amount >= 10000) {
-        return '$' + (amount / 1000).toFixed(1) + 'K';
-      }
-      return '$' + amount.toLocaleString();
-    }
-
     // Update stats
     async function updateStats() {
       try {
@@ -520,34 +428,29 @@
       }
     }
 
-    // Update momentum - simple calculation based on room activity
-    let currentMomentum = 50;
+    // Update momentum - based on room viewers vs platform active users
+    // 20% of platform = 100 momentum (max)
+    let currentMomentum = 0;
     async function updateMomentum() {
       if (config.demo) {
         // Random walk for demo
         currentMomentum = Math.max(0, Math.min(100, currentMomentum + (Math.random() - 0.5) * 20));
       } else if (config.roomData) {
-        // Use cached room data for momentum calculation
-        const viewers = config.roomData.current_user_count || 0;
-        const isLive = config.roomData.stream_status === 'online';
-        const followers = config.roomData.follower_count || 0;
+        try {
+          // Get platform-wide active users
+          const platformStats = await MyPrizeAPI.users.getStats();
+          const platformActive = platformStats.activeUserCount || 1;
+          const roomViewers = config.roomData.current_user_count || 0;
 
-        // Simple momentum: base 30, plus viewer ratio, plus live bonus
-        let momentum = 30;
+          // Target: 20% of platform users = 100 momentum
+          const target = platformActive * 0.20;
+          const momentum = (roomViewers / target) * 100;
 
-        // Viewer contribution (scale based on typical room size, up to 40 points)
-        momentum += Math.min(40, (viewers / 50) * 40);
-
-        // Live bonus (20 points)
-        if (isLive) momentum += 20;
-
-        // Follower bonus (up to 10 points based on engagement)
-        if (followers > 0 && viewers > 0) {
-          const engagement = Math.min(1, viewers / (followers * 0.1));
-          momentum += engagement * 10;
+          currentMomentum = Math.max(0, Math.min(100, momentum));
+          console.log(`[Momentum] Room: ${roomViewers}, Platform: ${platformActive}, Target 20%: ${target.toFixed(0)}, Momentum: ${currentMomentum.toFixed(1)}`);
+        } catch (error) {
+          console.error('[Momentum] Error fetching platform stats:', error);
         }
-
-        currentMomentum = Math.max(0, Math.min(100, momentum));
       }
 
       animateNumber(momentumValueEl, parseInt(momentumValueEl.textContent) || 0, Math.round(currentMomentum));
@@ -636,67 +539,6 @@
     }
 
     // Update big wins
-    let previousWinIds = new Set();
-    async function updateWins() {
-      try {
-        let wins;
-
-        if (config.demo) {
-          wins = [
-            { bet_id: '1', username: 'LuckyPlayer', igame: { name: 'Sweet Bonanza' }, amount_won: 25430, multiplier: 156.2 },
-            { bet_id: '2', username: 'WinMaster', igame: { name: 'Gates of Olympus' }, amount_won: 18750, multiplier: 89.5 },
-            { bet_id: '3', username: 'SlotKing', igame: { name: 'Starlight Princess' }, amount_won: 12680, multiplier: 67.3 },
-          ];
-        } else {
-          const params = { page_size: 5 };
-          if (config.roomId) {
-            params.equals_field = 'room_id';
-            params.equals_value = config.roomId;
-          }
-          const response = await MyPrizeAPI.bets.getBig(params);
-          wins = Array.isArray(response) ? response : response.data || [];
-        }
-
-        // Check for new wins
-        const newWinIds = new Set(wins.map(w => w.bet_id || w.id));
-        const hasNewWin = wins.some(w => !previousWinIds.has(w.bet_id || w.id));
-
-        if (hasNewWin && previousWinIds.size > 0) {
-          // Show alert banner
-          const topWin = wins[0];
-          alertBanner.querySelector('.alert-text').textContent =
-            `${topWin.username} won ${formatCurrency(topWin.amount_won)} on ${topWin.igame?.name || 'a game'}!`;
-          alertBanner.classList.remove('hidden');
-
-          // Auto-hide after 5 seconds
-          setTimeout(() => {
-            alertBanner.classList.add('hidden');
-          }, 5000);
-        }
-
-        previousWinIds = newWinIds;
-
-        // Render wins
-        winsListEl.innerHTML = wins.slice(0, 3).map((win, i) => {
-          const isNew = !previousWinIds.has(win.bet_id || win.id);
-          return `
-            <div class="win-item ${isNew ? 'animate-fade-in-left' : ''}" style="animation-delay: ${i * 50}ms">
-              <div class="win-game">
-                <div class="win-game-name">${win.igame?.name || 'Unknown'}</div>
-                <div class="win-username">${win.username || 'Anonymous'}</div>
-              </div>
-              <div class="win-details">
-                <span class="win-multiplier">${(win.multiplier || 0).toFixed(1)}x</span>
-                <span class="win-amount">${formatCurrency(win.amount_won || 0)}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } catch (error) {
-        console.error('[Wins] Error:', error);
-      }
-    }
-
     // Initialize overlay
     async function init() {
       console.log('[Overlay] Initializing with slug:', config.roomSlug);
@@ -713,13 +555,11 @@
       updateStats();
       updateGames(); // This also updates roomData for momentum
       updateMomentum();
-      updateWins();
 
       // Periodic updates
       setInterval(updateStats, config.refreshInterval);
       setInterval(updateGames, config.gamesRefreshInterval); // Games update every minute
       setInterval(updateMomentum, 10000); // Momentum every 10 seconds
-      setInterval(updateWins, config.refreshInterval);
 
       console.log('[Overlay] Streamer overlay initialized with config:', config);
     }
