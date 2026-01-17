@@ -920,3 +920,252 @@
 .list-item-action {
   flex-shrink: 0;
 }
+
+/* ============================================
+   GAME CAROUSEL
+   ============================================ */
+
+.widget-game-carousel {
+  width: 100%;
+}
+
+.game-carousel-widget {
+  overflow: hidden;
+}
+
+.game-carousel-widget .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.game-carousel-widget .card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.carousel-icon {
+  font-size: var(--font-size-xl);
+}
+
+.carousel-controls {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.carousel-controls .btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-600);
+  font-size: var(--font-size-sm);
+}
+
+.dark .carousel-controls .btn {
+  background: var(--color-neutral-800);
+  color: var(--color-neutral-300);
+}
+
+.carousel-controls .btn:hover:not(:disabled) {
+  background: var(--color-primary-500);
+  color: white;
+}
+
+.carousel-controls .btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: var(--space-2) 0;
+  cursor: grab;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-track:active {
+  cursor: grabbing;
+}
+
+/* Game Card */
+.game-card {
+  flex-shrink: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.game-card:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-500);
+}
+
+.game-card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--color-neutral-100);
+  overflow: hidden;
+}
+
+.dark .game-card-image {
+  background: var(--color-neutral-800);
+}
+
+.game-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.game-card:hover .game-card-image img {
+  transform: scale(1.05);
+}
+
+.game-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: var(--color-neutral-400);
+}
+
+.game-multiplier {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.multiplier-badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--color-accent-400);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+}
+
+.game-card-body {
+  padding: var(--space-3);
+}
+
+.game-name {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .game-name {
+  color: var(--color-neutral-100);
+}
+
+.game-provider {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-500);
+  text-transform: capitalize;
+}
+
+/* Carousel Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-300);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.dark .carousel-dot {
+  background: var(--color-neutral-600);
+}
+
+.carousel-dot:hover {
+  background: var(--color-neutral-400);
+}
+
+.carousel-dot.active {
+  width: 24px;
+  background: var(--color-primary-500);
+}
+
+/* Carousel Empty/Error States */
+.carousel-empty,
+.carousel-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  text-align: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+/* Skeleton Loading */
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-card .skeleton-image {
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
+}
+
+.skeleton-card .skeleton-title {
+  height: 16px;
+  width: 80%;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-card .skeleton-provider {
+  height: 12px;
+  width: 50%;
+}
