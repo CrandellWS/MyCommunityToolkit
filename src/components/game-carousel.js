@@ -371,12 +371,47 @@ const GameCarousel = (() => {
         }
 
         if (this.options.roomId) {
-          // Get room's recent games
-          console.log('[GameCarousel] Fetching recent games for room:', this.options.roomId);
-          const response = await MyPrizeAPI.rooms.getRecentGames(this.options.roomId, params);
-          console.log('[GameCarousel] API response:', response);
-          games = this.normalizeGameData(response);
-          console.log('[GameCarousel] Normalized games:', games.length, games);
+          // Get room data to find current game
+          console.log('[GameCarousel] Fetching room data for:', this.options.roomId);
+          const roomData = await MyPrizeAPI.rooms.get(this.options.roomId);
+          console.log('[GameCarousel] Room data:', roomData);
+
+          // Get the currently playing game from room data
+          if (roomData.last_igame_played_id) {
+            console.log('[GameCarousel] Fetching current game:', roomData.last_igame_played_id);
+            try {
+              const currentGame = await MyPrizeAPI.igames.get(roomData.last_igame_played_id);
+              console.log('[GameCarousel] Current game:', currentGame);
+              games.push({
+                id: currentGame.id,
+                name: currentGame.name || 'Unknown Game',
+                provider: currentGame.provider || currentGame.studio || 'Unknown',
+                image: currentGame.image || currentGame.thumbnail || null,
+                urlPath: currentGame.url_path,
+                multiplierMin: 1,
+                multiplierMax: 100,
+                popularity: 999, // High priority for current game
+                category: 'Slots',
+                isCurrentlyPlaying: true,
+              });
+            } catch (e) {
+              console.warn('[GameCarousel] Could not fetch current game:', e);
+            }
+          }
+
+          // Fill rest with popular games
+          const popularResponse = await MyPrizeAPI.igames.list({ page_size: this.options.limit });
+          const popularGames = this.normalizeGameData(popularResponse);
+
+          // Add popular games that aren't already in the list
+          const existingIds = new Set(games.map(g => g.id));
+          for (const game of popularGames) {
+            if (!existingIds.has(game.id) && games.length < this.options.limit) {
+              games.push(game);
+            }
+          }
+
+          this.updateTitle(games[0]?.isCurrentlyPlaying ? 'Now Playing & Popular' : 'Popular Games');
         } else {
           // Get general games list
           const response = await MyPrizeAPI.igames.list(params);
@@ -432,6 +467,35 @@ const GameCarousel = (() => {
           category: game.category || game.type || 'Slots',
         };
       });
+    }
+
+    /**
+     * Extract unique games from bets data
+     * @param {Array} bets - Array of bet objects
+     * @returns {Array} Unique games
+     * @private
+     */
+    extractGamesFromBets(bets) {
+      const gameMap = new Map();
+
+      bets.forEach(bet => {
+        const igame = bet.igame;
+        if (igame && igame.url_path && !gameMap.has(igame.url_path)) {
+          gameMap.set(igame.url_path, {
+            id: igame.reference_id || igame.url_path,
+            name: igame.name || 'Unknown Game',
+            provider: igame.provider || igame.studio || 'Unknown',
+            image: igame.image || igame.thumbnail || null,
+            urlPath: igame.url_path,
+            multiplierMin: 1,
+            multiplierMax: 100,
+            popularity: 0,
+            category: 'Slots',
+          });
+        }
+      });
+
+      return Array.from(gameMap.values()).slice(0, this.options.limit);
     }
 
     /**
@@ -674,6 +738,17 @@ const GameCarousel = (() => {
         if (retryBtn) {
           retryBtn.addEventListener('click', () => this.refresh());
         }
+      }
+    }
+
+    /**
+     * Update the widget title
+     * @param {string} newTitle - New title text
+     */
+    updateTitle(newTitle) {
+      const titleEl = this.container.querySelector('.card-title span:last-child');
+      if (titleEl) {
+        titleEl.textContent = newTitle;
       }
     }
 
