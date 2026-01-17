@@ -179,6 +179,8 @@ const ThemeConfig = (() => {
     if (theme === 'dark') {
       root.classList.add('dark');
     } else if (['neon', 'sunset', 'forest'].includes(theme)) {
+      // These themes are dark-based with custom accent colors
+      root.classList.add('dark');
       root.setAttribute('data-theme', theme);
     }
   }
