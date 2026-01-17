@@ -371,8 +371,11 @@ const GameCarousel = (() => {
 
         if (this.options.roomId) {
           // Get room's recent games
+          console.log('[GameCarousel] Fetching recent games for room:', this.options.roomId);
           const response = await MyPrizeAPI.rooms.getRecentGames(this.options.roomId, params);
+          console.log('[GameCarousel] API response:', response);
           games = this.normalizeGameData(response);
+          console.log('[GameCarousel] Normalized games:', games.length, games);
         } else {
           // Get general games list
           const response = await MyPrizeAPI.igames.list(params);
@@ -381,6 +384,7 @@ const GameCarousel = (() => {
 
         this.data = games;
         this.renderGames();
+        console.log('[GameCarousel] Rendered', games.length, 'games');
         this.setError(null);
 
         if (this.options.autoScroll) {
@@ -404,18 +408,29 @@ const GameCarousel = (() => {
      */
     normalizeGameData(response) {
       const data = response.igames || response.results || response.data || response.games || response;
-      if (!Array.isArray(data)) return [];
+      console.log('[GameCarousel] Raw data:', data);
+      if (!Array.isArray(data)) {
+        console.warn('[GameCarousel] Data is not an array:', typeof data, data);
+        return [];
+      }
 
-      return data.map(game => ({
-        id: game.id || game.game_id,
-        name: game.name || game.title || 'Unknown Game',
-        provider: game.provider || 'Unknown',
-        image: game.image || game.thumbnail || game.icon || null,
-        multiplierMin: game.multiplier_min || game.min_multiplier || 1,
-        multiplierMax: game.multiplier_max || game.max_multiplier || 100,
-        popularity: game.popularity || game.play_count || 0,
-        category: game.category || game.type || 'Slots',
-      }));
+      return data.map(game => {
+        // Log first game to see available fields
+        if (data.indexOf(game) === 0) {
+          console.log('[GameCarousel] Sample game fields:', Object.keys(game), game);
+        }
+        return {
+          id: game.id || game.game_id || game.reference_id,
+          name: game.name || game.title || 'Unknown Game',
+          provider: game.provider || game.studio || 'Unknown',
+          image: game.image || game.thumbnail || game.icon || game.image_url || game.logo || null,
+          urlPath: game.url_path || null,
+          multiplierMin: game.multiplier_min || game.min_multiplier || 1,
+          multiplierMax: game.multiplier_max || game.max_multiplier || 100,
+          popularity: game.popularity || game.play_count || 0,
+          category: game.category || game.type || 'Slots',
+        };
+      });
     }
 
     /**
