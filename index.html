@@ -957,6 +957,14 @@
       </div>
     </section>
 
+    <!-- Room Selector -->
+    <section class="reveal" aria-labelledby="room-title">
+      <div class="section-header">
+        <h2 id="room-title" class="section-title">Room Selection</h2>
+      </div>
+      <div id="room-selector-container"></div>
+    </section>
+
     <!-- Stats Dashboard -->
     <section class="reveal" aria-labelledby="stats-title">
       <div class="section-header">
@@ -1082,6 +1090,7 @@
   <script src="src/components/game-carousel.js"></script>
   <script src="src/components/user-profile.js"></script>
   <script src="src/components/settings-modal.js"></script>
+  <script src="src/components/room-selector.js"></script>
 
   <script>
     // Initialize on DOM ready
@@ -1152,6 +1161,26 @@
         SettingsModal.create({
           onSave: (settings) => {
             Toast.success('Settings saved successfully!');
+          }
+        });
+      }
+
+      // Initialize room selector
+      if (typeof RoomSelector !== 'undefined') {
+        RoomSelector.init('#room-selector-container', {
+          placeholder: 'Enter room slug (e.g., gwaslots)',
+          showSuggestions: true,
+          autoLoadFromUrl: true,
+        });
+
+        // Subscribe to room changes to update widgets
+        RoomSelector.subscribe((room) => {
+          if (room) {
+            Toast.success(`Connected to ${room.name}`);
+            // Reinitialize widgets with the new room ID
+            reinitializeWidgetsWithRoom(room.id);
+          } else {
+            Toast.info('Room disconnected');
           }
         });
       }
@@ -1307,6 +1336,58 @@
       if (el) {
         el.textContent = `${status.used.toLocaleString()} / ${status.limit.toLocaleString()} (${status.percentage.toFixed(1)}%)`;
       }
+    }
+
+    function reinitializeWidgetsWithRoom(roomId) {
+      // Destroy existing widgets that use room data
+      Widgets.getAll().forEach(w => {
+        if (w.options && (w.constructor.name === 'BigWins' || w.constructor.name === 'MomentumMeter')) {
+          w.destroy();
+        }
+      });
+
+      // Recreate Big Wins widget with room ID
+      Widgets.create('big-wins', '#widget-big-wins', {
+        title: 'Recent Big Wins',
+        limit: 5,
+        roomId: roomId,
+        refreshInterval: 30000,
+      });
+
+      // Recreate Momentum widget with room ID
+      Widgets.create('momentum', '#widget-momentum', {
+        roomId: roomId,
+        showLabels: true,
+        showValue: true,
+        refreshInterval: 30000,
+      });
+
+      // Recreate Game Carousel with room's recent games
+      if (typeof GameCarousel !== 'undefined') {
+        const carouselContainer = document.querySelector('#widget-game-carousel');
+        if (carouselContainer) {
+          carouselContainer.innerHTML = '';
+          GameCarousel.create('#widget-game-carousel', {
+            title: 'Recent Games',
+            roomId: roomId,
+            limit: 15,
+            showProvider: true,
+            showMultiplier: true,
+            showArrows: true,
+            refreshInterval: 120000,
+          });
+        }
+      }
+
+      // Recreate Missions widget with room filter
+      Widgets.create('missions', '#widget-missions', {
+        title: 'Room Missions',
+        limit: 5,
+        roomId: roomId,
+        refreshInterval: 60000,
+      });
+
+      console.log('[Dashboard] Widgets reinitialized for room:', roomId);
     }
   </script>
 </body>
