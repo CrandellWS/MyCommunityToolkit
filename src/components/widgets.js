@@ -699,16 +699,17 @@ const Widgets = (() => {
 
       try {
         const params = {
-          status: 'active',
+          start_status: 'active',
           page_size: this.options.limit,
         };
 
         if (this.options.roomId) {
-          params.room_id = this.options.roomId;
+          params.equals_field = 'room_id';
+          params.equals_value = this.options.roomId;
         }
 
         const response = await MyPrizeAPI.missions.list(params);
-        const missions = response.data || response.missions || [];
+        const missions = response.results || response.data || [];
 
         this.renderMissions(missions);
         this.setError(null);

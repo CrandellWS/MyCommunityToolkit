@@ -1448,6 +1448,134 @@
   color: var(--color-error);
 }
 
+/* ============================================
+   MISSIONS WIDGET
+   ============================================ */
+
+.missions-widget .card {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mission-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.dark .mission-item {
+  background: var(--color-neutral-800);
+}
+
+.mission-item:hover {
+  background: var(--color-neutral-100);
+  transform: translateX(4px);
+}
+
+.dark .mission-item:hover {
+  background: var(--color-neutral-700);
+}
+
+.mission-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-100);
+  border-radius: var(--radius-md);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.dark .mission-icon {
+  background: var(--color-primary-900);
+}
+
+.mission-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.mission-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mission-name {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mission-progress {
+  margin-top: var(--space-2);
+}
+
+.mission-progress-bar {
+  height: 6px;
+  background: var(--color-neutral-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-1);
+}
+
+.dark .mission-progress-bar {
+  background: var(--color-neutral-700);
+}
+
+.mission-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.mission-progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-500);
+}
+
+.mission-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-accent-100);
+  color: var(--color-accent-700);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-2);
+}
+
+.dark .mission-reward {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--color-accent-400);
+}
+
+.mission-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-500);
+  margin-top: var(--space-1);
+}
+
 /* Spinner for loading state */
 .room-search-btn .spinner {
   width: 16px;
