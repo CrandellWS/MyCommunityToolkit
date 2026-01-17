@@ -403,7 +403,7 @@ const GameCarousel = (() => {
      * @private
      */
     normalizeGameData(response) {
-      const data = response.results || response.data || response.games || response;
+      const data = response.igames || response.results || response.data || response.games || response;
       if (!Array.isArray(data)) return [];
 
       return data.map(game => ({
