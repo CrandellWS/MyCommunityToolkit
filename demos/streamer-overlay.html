@@ -273,38 +273,35 @@
     }
 
     .player-item {
-      padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.05);
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 8px;
       text-align: center;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.7);
-      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .player-item.highlight {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(34, 197, 94, 0.4));
-      color: #ffffff;
-      font-weight: 600;
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-    }
 
     .players-scroll-center-zone {
       position: absolute;
       top: 50%;
       left: 0;
       right: 0;
-      height: 36px;
+      height: 40px;
       transform: translateY(-50%);
       pointer-events: none;
-      border-top: 1px solid rgba(59, 130, 246, 0.3);
-      border-bottom: 1px solid rgba(59, 130, 246, 0.3);
-      background: rgba(59, 130, 246, 0.05);
+      border-top: 2px solid rgba(59, 130, 246, 0.5);
+      border-bottom: 2px solid rgba(59, 130, 246, 0.5);
+      background: linear-gradient(90deg,
+        rgba(59, 130, 246, 0.15),
+        rgba(34, 197, 94, 0.15));
+      box-shadow:
+        0 0 20px rgba(59, 130, 246, 0.2),
+        inset 0 0 20px rgba(59, 130, 246, 0.1);
     }
 
     /* Hide based on visibility settings */
@@ -773,36 +770,9 @@
       const scrollDuration = players.length * 2;
       playersListEl.style.setProperty('--scroll-duration', `${scrollDuration}s`);
 
-      playersListEl.innerHTML = duplicated.map((name, i) => `
-        <div class="player-item" data-index="${i % players.length}">${name}</div>
+      playersListEl.innerHTML = duplicated.map((name) => `
+        <div class="player-item">${name}</div>
       `).join('');
-
-      // Restart highlight animation
-      startHighlightAnimation(players.length);
-    }
-
-    let highlightInterval = null;
-    function startHighlightAnimation(playerCount) {
-      if (highlightInterval) clearInterval(highlightInterval);
-
-      const items = playersListEl.querySelectorAll('.player-item');
-      let currentIndex = 0;
-      const intervalTime = 2000; // 2 seconds per player (matches scroll speed)
-
-      function updateHighlight() {
-        items.forEach((item, i) => {
-          const itemIndex = i % playerCount;
-          if (itemIndex === currentIndex) {
-            item.classList.add('highlight');
-          } else {
-            item.classList.remove('highlight');
-          }
-        });
-        currentIndex = (currentIndex + 1) % playerCount;
-      }
-
-      updateHighlight();
-      highlightInterval = setInterval(updateHighlight, intervalTime);
     }
 
     // Initialize overlay
